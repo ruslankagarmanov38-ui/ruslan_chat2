@@ -1,80 +1,99 @@
-const express = require('express');
+const express = require("express");
 const app = express();
-const http = require('http').createServer(app);
-const cors = require('cors');
-const io = require('socket.io')(http, {
-    cors: { origin: "*" }
-});
+const http = require("http").createServer(app);
+const io = require("socket.io")(http, { cors: { origin: "*" } });
 
-app.use(express.static('public'));
-app.use(cors());
+app.use(express.static("public")); // index.html должен лежать в /public/
 
-let queue = [];
-let partners = {};
-let online = 0;
+let queue = [];              // очередь на поиск
+let partners = {};           // пары собеседников
+let online = 0;              // онлайн
 
 io.on("connection", socket => {
     online++;
-    io.emit("online", online);
+    io.emit("online_count", online);
 
-    socket.on("find", data => {
-        socket.my = data;
+    // -------------------------------
+    // ПОИСК СОБЕСЕДНИКА
+    // -------------------------------
+    socket.on("find", (prefs) => {
+        // Только если не в чате
+        if (partners[socket.id]) return;
 
-        let partner = queue.find(u =>
-            u.my.gender !== undefined &&
-            u.my.search !== undefined &&
-            compatible(u.my, data)
-        );
+        // Если есть кто-то в очереди — соединяем
+        if (queue.length > 0) {
+            let partner = queue.shift();
 
-        if (partner) {
-            queue = queue.filter(u => u !== partner);
             partners[socket.id] = partner;
-            partners[partner.id] = socket;
+            partners[partner] = socket.id;
 
-            socket.emit("found");
-            partner.emit("found");
+            io.to(socket.id).emit("chat_start");
+            io.to(partner).emit("chat_start");
         } else {
-            queue.push(socket);
+            // добавляем в очередь
+            queue.push(socket.id);
+            io.to(socket.id).emit("searching");
         }
     });
 
+    // -------------------------------
+    // ОТПРАВКА СООБЩЕНИЙ
+    // -------------------------------
+    socket.on("msg", text => {
+        let p = partners[socket.id];
+        if (p) io.to(p).emit("msg", text);
+    });
+
+    // -------------------------------
+    // СТАТУС "ПИШЕТ"
+    // -------------------------------
     socket.on("typing", () => {
         let p = partners[socket.id];
-        if (p) p.emit("typing");
+        if (p) io.to(p).emit("typing");
     });
 
-    socket.on("msg", txt => {
-        let p = partners[socket.id];
-        if (p) p.emit("msg", txt);
+    // -------------------------------
+    // ЗАВЕРШЕНИЕ ЧАТА
+    // -------------------------------
+    socket.on("end_chat", () => {
+        endChat(socket.id);
     });
 
-    socket.on("stop", () => endChat(socket));
+    // -------------------------------
+    // ОТМЕНА ПОИСКА
+    // -------------------------------
+    socket.on("cancel_search", () => {
+        queue = queue.filter(id => id !== socket.id);
+        io.to(socket.id).emit("search_cancelled");
+    });
 
+    // -------------------------------
+    // ОТКЛЮЧЕНИЕ КЛИЕНТА
+    // -------------------------------
     socket.on("disconnect", () => {
-        endChat(socket);
         online--;
-        io.emit("online", online);
+        io.emit("online_count", online);
+
+        endChat(socket.id);
+
+        // Удаляем из очереди
+        queue = queue.filter(id => id !== socket.id);
     });
 });
 
-function compatible(a, b) {
-    if (b.search === "Ищу любой") return true;
-    if (b.search === "Ищу мужчину" && a.gender === "Мужчина") return true;
-    if (b.search === "Ищу женщину" && a.gender === "Женщина") return true;
-    return false;
+
+// ---------------------------------------
+// ФУНКЦИЯ ЗАВЕРШЕНИЯ ЧАТА
+// ---------------------------------------
+function endChat(id) {
+    let p = partners[id];
+    if (p) {
+        io.to(p).emit("chat_end");
+        delete partners[p];
+    }
+    delete partners[id];
 }
 
-function endChat(s) {
-    if (queue.includes(s))
-        queue = queue.filter(u => u !== s);
-
-    let p = partners[s.id];
-    if (!p) return;
-
-    p.emit("end");
-
-    delete partners[p.id];
-    delete partners[s.id];
-}
-
-http.listen(8080, () => console.log("SERVER OK"));
+http.listen(process.env.PORT || 3000, () => {
+    console.log("Server started");
+});
