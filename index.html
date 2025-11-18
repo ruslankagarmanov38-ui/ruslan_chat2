@@ -1,368 +1,292 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Ruslan Chat — Neon</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<meta charset="UTF-8">
+<title>Ruslan Chat</title>
 <style>
-:root{
-  --bg-dark:#050507;
-  --panel:#0f0f12;
-  --neon: #00ff88;
-  --neon-weak: rgba(0,255,136,0.14);
-  --bubble-me:#07180b; /* dark green */
-  --bubble-part:#0b0b0f;
-  --btn-green: #23ff6f;
-  --text-light:#e8f6ef;
-  --muted:#9aa0a6;
-  --radius:14px;
-  transition: 0.25s;
-}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg-dark);color:var(--text-light);font-family:Inter, system-ui, Arial}
-.app{
-  max-width:480px;margin:0 auto;height:100vh;display:flex;flex-direction:column;padding:18px;
-}
+    body {
+        margin:0;
+        font-family: Arial, sans-serif;
+        background: #0d0d0d;
+        color:white;
+        transition: 0.4s;
+    }
 
-/* header */
-.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.logo{
-  display:flex;align-items:center;gap:12px;
-}
-.logo .mark{
-  width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,#05231b,#003922);
-  box-shadow:0 6px 28px rgba(0,255,136,0.08), 0 0 30px rgba(0,255,136,0.06) inset;
-  display:flex;align-items:center;justify-content:center;font-weight:800;color:#001b0c;
-  border:2px solid rgba(0,255,136,0.08);
-}
-.logo .title{font-weight:800;font-size:18px;color:var(--neon);text-shadow:0 0 18px rgba(0,255,136,0.12)}
+    body.light {
+        background:white;
+        color:black;
+    }
 
-/* online */
-.online{font-size:13px;color:var(--muted)}
+    .header {
+        display:flex;
+        justify-content: space-between;
+        align-items:center;
+        padding:15px;
+        font-size:20px;
+        font-weight:600;
+    }
 
-/* menu panel */
-.panel{
-  background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
-  border-radius:12px;padding:14px;box-shadow: 0 6px 30px rgba(2,6,8,0.6);border:1px solid rgba(0,0,0,0.5)
-}
+    .theme-btn {
+        cursor:pointer;
+        padding:5px 14px;
+        border-radius:6px;
+        background:#222;
+        transition:.3s;
+    }
 
-/* selects */
-.row{display:flex;gap:10px;margin-bottom:10px}
-select{
-  -webkit-appearance:none;appearance:none;background:transparent;border:1px solid rgba(255,255,255,0.04);
-  padding:12px;border-radius:10px;color:var(--text-light);flex:1;font-size:14px;
-  outline:none;box-shadow:0 4px 18px rgba(0,0,0,0.6)
-}
-.select-wrap{position:relative}
-.select-wrap::after{content:"";position:absolute;right:12px;top:50%;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-50%) rotate(45deg)}
+    body.light .theme-btn {
+        background:#ddd;
+        color:black;
+    }
 
-/* big green button style (черный текст) */
-.btn{
-  width:100%;
-  padding:12px 14px;
-  background:linear-gradient(180deg,var(--btn-green),#12d94d);
-  color:#000;
-  font-weight:800;
-  border-radius:12px;
-  border:0;
-  cursor:pointer;
-  box-shadow:0 8px 28px rgba(0,255,136,0.12);
-  transition:transform .14s ease, filter .14s ease;
-  text-transform:uppercase;
-}
-.btn:hover{transform:translateY(-3px);filter:brightness(1.04)}
+    .container {
+        width:420px;
+        margin: auto;
+        margin-top:20px;
+    }
 
-/* cancel button */
-.btn-cancel{
-  margin-top:10px;background:#ff5b5b;color:#000;font-weight:800;border-radius:12px;padding:10px;border:none;
-  box-shadow:0 8px 24px rgba(255,80,80,0.08)
-}
+    select {
+        width:49%;
+        padding:10px;
+        border-radius:6px;
+        border:none;
+        margin-bottom: 15px;
+        background:#1b1b1b;
+        color:white;
+        outline:none;
+    }
+    body.light select {
+        background:#eee;
+        color:black;
+    }
 
-/* spinner (roulette) */
-.roulette{
-  display:flex;align-items:center;gap:12px;margin-top:12px;justify-content:center;opacity:0;transform:translateY(-6px);transition:all .28s;
-}
-.roulette.show{opacity:1;transform:translateY(0)}
-.spinner{
-  width:54px;height:54px;border-radius:50%;border:6px solid rgba(0,0,0,0.25);border-top-color:var(--neon);
-  animation:spin 0.85s linear infinite;box-shadow:0 0 28px rgba(0,255,136,0.08);
-}
-@keyframes spin{to{transform:rotate(360deg)}}
+    #findBtn {
+        width:100%;
+        padding:13px;
+        border:none;
+        border-radius:10px;
+        background:#00ff7b;
+        font-size:16px;
+        cursor:pointer;
+        font-weight:700;
+        box-shadow:0 0 15px #00ff7b88;
+        transition:.25s;
+    }
 
-/* chat area */
-.chat-area{flex:1;display:flex;flex-direction:column;margin-top:14px}
-.messages{
-  flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:8px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.02);
-}
+    #stopBtn {
+        display:none;
+        width:100%;
+        margin-top:10px;
+        padding:13px;
+        border:none;
+        border-radius:10px;
+        background:#ff5555;
+        font-size:16px;
+        cursor:pointer;
+        font-weight:700;
+        box-shadow:0 0 15px #ff444488;
+        transition:.25s;
+    }
 
-/* message bubble: telegram-style B / neon theme 3 */
-.msg{
-  max-width:78%;
-  padding:10px 14px;
-  border-radius:18px;
-  position:relative;
-  font-size:15px;
-  line-height:1.25;
-  animation:msgIn .18s cubic-bezier(.2,.8,.2,1);
-  box-shadow:0 6px 18px rgba(0,0,0,0.6);
-}
-@keyframes msgIn{from{opacity:0;transform:translateY(6px) scale(.995)}to{opacity:1;transform:none}}
+    #spinner {
+        display:none;
+        text-align:center;
+        margin:10px 0;
+        font-size:18px;
+        opacity:0.7;
+    }
 
-/* partner bubble */
-.msg.partner{
-  align-self:flex-start;
-  background:var(--bubble-part);
-  border:1px solid rgba(0,255,136,0.06);
-  box-shadow:0 6px 30px rgba(0,0,0,0.6);
-  color:var(--text-light);
-  border-top-left-radius:4px;
-}
+    #chat {
+        width:100%;
+        height:380px;
+        margin-top:15px;
+        padding:10px;
+        overflow-y:auto;
+        background:#0f0f0f;
+        border-radius:10px;
+        box-shadow: inset 0 0 10px #000;
+    }
 
-/* my bubble */
-.msg.me{
-  align-self:flex-end;
-  background:linear-gradient(180deg,#05231b,#003922);
-  color: #dfffe6;
-  border:1px solid rgba(0,255,136,0.18);
-  box-shadow:0 12px 30px rgba(0,255,136,0.06);
-  border-top-right-radius:4px;
-}
+    body.light #chat {
+        background:#fafafa;
+        box-shadow: inset 0 0 10px #ccc;
+    }
 
-/* neon outline (glow) */
-.msg.me::after, .msg.partner::after{
-  content:"";position:absolute;left:0;right:0;bottom:-6px;height:6px;border-radius:6px;filter:blur(12px);
-}
-.msg.me::after{background:linear-gradient(90deg, rgba(0,255,136,0.12), rgba(0,255,136,0.02))}
-.msg.partner::after{background:linear-gradient(90deg, rgba(0,255,136,0.06), rgba(0,255,136,0.01))}
+    .msg {
+        padding:8px 12px;
+        margin:8px 0;
+        max-width:80%;
+        border-radius:12px;
+        animation: pop .25s ease;
+    }
 
-/* typing indicator */
-.typing{font-size:13px;color:var(--muted);margin-top:6px;display:none}
+    @keyframes pop { from { transform:scale(.8); opacity:0;} }
 
-/* input row */
-.input-row{display:flex;gap:10px;margin-top:12px;align-items:center}
-.input{
-  flex:1;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);
-  background:transparent;color:var(--text-light);outline:none;font-size:15px
-}
-.icon-btn{background:transparent;border:1px solid rgba(255,255,255,0.05);padding:10px;border-radius:10px;cursor:pointer;color:var(--text-light)}
-.icon-btn:hover{box-shadow:0 6px 20px rgba(0,0,0,0.6)}
+    .me {
+        background:#0084ff;
+        align-self:flex-end;
+        color:white;
+        margin-left:auto;
+    }
 
-/* theme toggle */
-.theme-toggle{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px;border-radius:10px;cursor:pointer}
+    .other {
+        background:#2b2b2b;
+    }
 
-/* small screens */
-@media(max-width:420px){
-  .app{padding:12px}
-  .logo .title{font-size:16px}
-}
+    body.light .other { background:#ddd; color:black; }
+
+    .input-box {
+        display:flex;
+        gap:10px;
+        margin-top:10px;
+    }
+
+    #msgInput {
+        flex:1;
+        padding:10px;
+        border-radius:8px;
+        border:none;
+    }
+
+    #sendBtn {
+        padding:10px 16px;
+        background:#00ff7b;
+        border:none;
+        border-radius:8px;
+        cursor:pointer;
+    }
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="header">
-    <div class="logo">
-      <div class="mark">RC</div>
-      <div class="title">Ruslan Chat</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <div class="online" id="online">Онлайн: 0</div>
-      <button class="theme-toggle" id="themeBtn">Тема</button>
-    </div>
-  </div>
 
-  <div class="panel">
-    <div class="row">
-      <div style="flex:1" class="select-wrap">
-        <select id="myGender">
-          <option value="m">Мужчина</option>
-          <option value="f">Женщина</option>
-          <option value="a">Не важно</option>
-        </select>
-      </div>
-      <div style="flex:1" class="select-wrap">
-        <select id="seekGender">
-          <option value="a">Ищу любой</option>
-          <option value="m">Ищу мужчину</option>
-          <option value="f">Ищу женщину</option>
-        </select>
-      </div>
-    </div>
+<div class="header">
+    Ruslan Chat
+    <div class="theme-btn" id="themeBtn">Тема</div>
+</div>
 
-    <button id="findBtn" class="btn">Найти собеседника</button>
+<div class="container">
 
-    <div class="roulette" id="roulette">
-      <div class="spinner"></div>
-      <div style="color:var(--muted)">Ищем подходящего…</div>
+    <div id="online">Онлайн: 0</div>
+
+    <select id="gender">
+        <option>Мужчина</option>
+        <option>Женщина</option>
+    </select>
+
+    <select id="looking">
+        <option>Ищу любой</option>
+        <option>Ищу мужчину</option>
+        <option>Ищу женщину</option>
+    </select>
+
+    <button id="findBtn">НАЙТИ СОБЕСЕДНИКА</button>
+    <button id="stopBtn">Прекратить поиск</button>
+
+    <div id="spinner">⏳ Поиск...</div>
+
+    <div id="chat"></div>
+
+    <div class="input-box">
+        <input id="msgInput" placeholder="Введите сообщение..." disabled>
+        <button id="sendBtn" disabled>Отправить</button>
     </div>
 
-    <button id="cancelBtn" class="btn-cancel">Прекратить поиск</button>
-  </div>
-
-  <div class="chat-area">
-    <div class="messages panel" id="messages"></div>
-    <div class="typing" id="typing">Собеседник печатает...</div>
-
-    <div class="input-row">
-      <input id="textInput" class="input" placeholder="Введите сообщение..." />
-      <button id="sendBtn" class="icon-btn">Отправить</button>
-    </div>
-
-    <div style="margin-top:12px;display:flex;gap:8px">
-      <button id="endBtn" class="btn" style="background:#ff7b6b;color:#000;display:none">Завершить чат</button>
-    </div>
-  </div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-/* Client-side logic (compatible with server.js below) */
 const socket = io();
+let inChat = false;
 
-const onlineEl = document.getElementById('online');
-const findBtn = document.getElementById('findBtn');
-const cancelBtn = document.getElementById('cancelBtn');
-const roulette = document.getElementById('roulette');
-const messagesEl = document.getElementById('messages');
-const typingEl = document.getElementById('typing');
-const textInput = document.getElementById('textInput');
-const sendBtn = document.getElementById('sendBtn');
-const endBtn = document.getElementById('endBtn');
-const themeBtn = document.getElementById('themeBtn');
+document.getElementById("themeBtn").onclick = () =>
+{
+    document.body.classList.toggle("light");
+};
 
-let currentRoom = null;
-let isSearching = false;
-let typingTimer = null;
-
-/* theme */
-const THEME_KEY = 'rc_theme';
-function applyTheme(name){
-  if(name==='light'){
-    document.documentElement.style.setProperty('--bg-dark','#f6f7f8');
-    document.documentElement.style.setProperty('--panel','#ffffff');
-    document.documentElement.style.setProperty('--text-light','#07171a');
-    document.documentElement.style.setProperty('--muted','#51585b');
-    document.documentElement.style.setProperty('--btn-green','#a5ffb7');
-    document.documentElement.style.setProperty('--neon','#00c875');
-    document.documentElement.style.background = getComputedStyle(document.documentElement).getPropertyValue('--bg-dark');
-  } else {
-    // dark defaults already set in CSS
-    document.documentElement.style.setProperty('--bg-dark','#050507');
-    document.documentElement.style.setProperty('--panel','#0f0f12');
-    document.documentElement.style.setProperty('--text-light','#e8f6ef');
-    document.documentElement.style.setProperty('--muted','#9aa0a6');
-    document.documentElement.style.setProperty('--btn-green','#23ff6f');
-    document.documentElement.style.setProperty('--neon','#00ff88');
-  }
-}
-let saved = localStorage.getItem(THEME_KEY) || 'dark';
-applyTheme(saved);
-themeBtn.innerText = saved==='dark' ? 'Тема: тёмная' : 'Тема: светлая';
-themeBtn.onclick = () => {
-  saved = saved==='dark' ? 'light' : 'dark';
-  localStorage.setItem(THEME_KEY, saved);
-  applyTheme(saved);
-  themeBtn.innerText = saved==='dark' ? 'Тема: тёмная' : 'Тема: светлая';
-}
-
-/* online counter */
-socket.on('online_count', n => {
-  onlineEl.innerText = 'Онлайн: ' + n;
+socket.on("online_count", n=>{
+    document.getElementById("online").innerText = "Онлайн: " + n;
 });
 
-/* UI helpers */
-function showSearching(v){
-  isSearching = v;
-  if(v){
-    roulette.classList.add('show');
-    cancelBtn.style.display = 'block';
-    findBtn.style.display = 'none';
-  } else {
-    roulette.classList.remove('show');
-    cancelBtn.style.display = 'none';
-    findBtn.style.display = 'block';
-  }
-}
-function appendMessage(text, who){
-  const div = document.createElement('div');
-  div.className = 'msg ' + (who==='me' ? 'me' : 'partner');
-  div.innerText = text;
-  messagesEl.appendChild(div);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-}
+document.getElementById("findBtn").onclick = ()=>{
+    socket.emit("find", {
+        gender: gender.value,
+        looking: looking.value
+    });
 
-/* find/cancel */
-findBtn.onclick = () => {
-  const myGender = document.getElementById('myGender').value;
-  const seekGender = document.getElementById('seekGender').value;
-  socket.emit('join_queue', { myGender, seekingGender: seekGender });
-  showSearching(true);
-}
+    spinner.style.display="block";
+    stopBtn.style.display="block";
+    findBtn.style.display="none";
+};
 
-cancelBtn.onclick = () => {
-  socket.emit('leave_queue');
-  showSearching(false);
-}
+document.getElementById("stopBtn").onclick = ()=>{
+    socket.emit("stop");
+    resetUI();
+};
 
-/* matched */
-socket.on('matched', data=>{
-  currentRoom = data.roomId;
-  showSearching(false);
-  appendMessage('--- Собеседник найден — начат чат ---', 'partner');
-  endBtn.style.display = 'inline-block';
+socket.on("found",()=>{
+    inChat = true;
+    spinner.style.display="none";
+    msgInput.disabled = false;
+    sendBtn.disabled = false;
 });
 
-/* message sending: client appends immediately and server will only broadcast to partner */
-sendBtn.onclick = () => {
-  const t = textInput.value.trim();
-  if(!t || !currentRoom) return;
-  appendMessage('Вы: ' + t, 'me');
-  socket.emit('message', { roomId: currentRoom, text: t });
-  textInput.value = '';
-  socket.emit('typing_stop', { roomId: currentRoom });
+socket.on("partner_left",()=>{
+    if (!inChat) return;
+    add("Собеседник отключился");
+    inChat=false;
+    resetUI();
+});
+
+function resetUI(){
+    findBtn.style.display="block";
+    stopBtn.style.display="none";
+    spinner.style.display="none";
+    msgInput.disabled=true;
+    sendBtn.disabled=true;
 }
 
-/* enter to send */
-textInput.addEventListener('keydown', (e)=>{
-  if(e.key === 'Enter'){ sendBtn.onclick(); }
-  else { socket.emit('typing', { roomId: currentRoom }); }
+sendBtn.onclick = send;
+
+msgInput.addEventListener("keydown", e=>{
+    if(e.key==="Enter") send();
 });
 
-/* receive message from partner */
-socket.on('message', obj=>{
-  // server sends only to partner, so this is partner message
-  appendMessage('Собеседник: ' + obj.text, 'partner');
-});
+function send(){
+    let t = msgInput.value.trim();
+    if(!t) return;
 
-/* typing indicator: show when partner typing */
-socket.on('partner_typing', ()=>{
-  typingEl.style.display = 'block';
-  clearTimeout(typingTimer);
-  typingTimer = setTimeout(()=>{ typingEl.style.display='none'; }, 1400);
-});
-socket.on('partner_typing_stop', ()=>{ typingEl.style.display='none'; });
-
-/* end chat by partner or by server when partner disconnects */
-socket.on('ended', ()=>{
-  appendMessage('--- Разговор завершён ---', 'partner');
-  currentRoom = null;
-  endBtn.style.display = 'none';
-});
-socket.on('partner_disconnected', ()=>{
-  appendMessage('--- Собеседник закрыл вкладку или потерял связь ---', 'partner');
-  currentRoom = null;
-  endBtn.style.display = 'none';
-});
-
-/* end button */
-endBtn.onclick = () => {
-  if(currentRoom) socket.emit('end', { roomId: currentRoom });
-  currentRoom = null;
-  endBtn.style.display = 'none';
+    addMy(t);
+    socket.emit("msg", t);
+    msgInput.value="";
 }
 
-/* avoid global reload on unrelated disconnects — server will not broadcast to everyone */
+socket.on("msg", t=>{
+    addOther(t);
+});
+
+function addMy(t){
+    addMsg("me", t);
+}
+
+function addOther(t){
+    addMsg("other", t);
+}
+
+function addMsg(type, text){
+    let d = document.createElement("div");
+    d.className = "msg "+type;
+    d.innerText = text;
+    chat.appendChild(d);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function add(text){
+    let d = document.createElement("div");
+    d.style.opacity=0.7;
+    d.innerText = text;
+    chat.appendChild(d);
+}
 </script>
 </body>
 </html>
+
