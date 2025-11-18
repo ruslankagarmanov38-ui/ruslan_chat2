@@ -7,186 +7,234 @@
 
 <style>
 
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #000;
-        color: #0f0;
-        overflow-x: hidden;
-    }
+/* -------------------- */
+/*  ЦВЕТА ТЕМЫ           */
+/* -------------------- */
 
-    /* НЕОНОВЫЕ ЭФФЕКТЫ */
-    .glow {
-        text-shadow: 0 0 10px #00ff91, 0 0 20px #00ff91, 0 0 40px #00ff91;
-    }
+:root {
+    --bg: #000;
+    --text: #0f0;
+    --panel-bg: rgba(0,255,50,0.06);
+    --msg-bg: #1d1f23;
+    --input-bg: #222;
+    --logo-bg: #00ff91;
+}
 
-    #header {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 15px 25px;
-        font-size: 26px;
-        font-weight: bold;
-    }
+.light {
+    --bg: #f2f2f2;
+    --text: #000;
+    --panel-bg: #ffffff;
+    --msg-bg: #ededed;
+    --input-bg: #ffffff;
+    --logo-bg: #00c86d;
+}
 
-    #logo {
-        background: #00ff91;
-        color: #000;
-        padding: 7px 14px;
-        border-radius: 12px;
-        font-weight: bold;
-        box-shadow: 0 0 20px #00ff91;
-    }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    transition: 0.3s;
+}
 
-    #panel {
-        width: 70%;
-        margin: 20px auto;
-        padding: 25px;
-        border-radius: 20px;
-        background: rgba(0, 255, 50, 0.06);
-        box-shadow: 0 0 25px #00ff91;
-        transition: 0.3s;
-    }
+/* -------------------- */
+/*     НЕОНОВЫЕ ЭФФЕКТЫ */
+/* -------------------- */
 
-    label {
-        display: block;
-        margin-bottom: 5px;
-        font-size: 18px;
-        color: #00ff91;
-    }
+.glow {
+    text-shadow: 0 0 10px #00ff91, 0 0 20px #00ff91, 0 0 40px #00ff91;
+}
 
-    select {
-        width: 180px;
-        padding: 10px;
-        border-radius: 8px;
-        border: none;
-        font-size: 16px;
-        background: #fff;
-    }
+#header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+    font-size: 26px;
+    font-weight: bold;
+}
 
-    #findBtn {
-        margin-top: 20px;
-        width: 100%;
-        padding: 18px;
-        font-size: 20px;
-        font-weight: bold;
-        background: #00ff66;
-        border: none;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: 0.3s;
-        box-shadow: 0 0 25px #00ff91;
-    }
+#logo {
+    background: var(--logo-bg);
+    color: #000;
+    padding: 7px 14px;
+    border-radius: 12px;
+    font-weight: bold;
+    box-shadow: 0 0 20px var(--logo-bg);
+}
 
-    #findBtn:hover {
-        transform: scale(1.03);
-        box-shadow: 0 0 40px #00ff91;
-    }
+/* кнопка темы */
 
-    #stopSearch {
-        display: none;
-        margin-top: 15px;
-        width: 100%;
-        padding: 14px;
-        background: #ff3b3b;
-        border-radius: 10px;
-        border: none;
-        color: white;
-        font-size: 18px;
-        cursor: pointer;
-        box-shadow: 0 0 20px #ff3b3b;
-    }
+#themeBtn {
+    padding: 10px 15px;
+    background: var(--logo-bg);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    box-shadow: 0 0 18px var(--logo-bg);
+}
 
-    /* СПИННЕР */
-    #spinner {
-        display: none;
-        margin: 15px auto;
-        border: 6px solid #333;
-        border-top: 6px solid #00ff91;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        animation: spin 1s linear infinite;
-    }
+/* -------------------- */
+/*       ПАНЕЛЬ         */
+/* -------------------- */
 
-    @keyframes spin {
-        100% { transform: rotate(360deg); }
-    }
+#panel {
+    width: 70%;
+    margin: 20px auto;
+    padding: 25px;
+    border-radius: 20px;
+    background: var(--panel-bg);
+    box-shadow: 0 0 25px #00ff91;
+    transition: 0.3s;
+}
 
-    /* ЧАТ */
-    #chat {
-        display: none;
-        width: 70%;
-        margin: 20px auto;
-    }
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 18px;
+}
 
-    #messages {
-        background: #0d0f12;
-        height: 430px;
-        overflow-y: auto;
-        padding: 20px;
-        border-radius: 16px;
-        box-shadow: 0 0 25px #00ff91;
-    }
+select {
+    width: 180px;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    background: white;
+}
 
-    .msg {
-        background: #1d1f23;
-        color: #fff;
-        padding: 12px 16px;
-        border-radius: 14px;
-        margin-bottom: 10px;
-        max-width: 70%;
-        animation: fade 0.25s ease;
-    }
+/* КНОПКИ */
 
-    @keyframes fade {
-        from {opacity: 0; transform: translateY(10px);}
-        to {opacity: 1;}
-    }
+#findBtn {
+    margin-top: 20px;
+    width: 100%;
+    padding: 18px;
+    font-size: 20px;
+    font-weight: bold;
+    background: #00ff66;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 0 25px #00ff91;
+}
 
-    #typing {
-        color: #888;
-        padding: 5px;
-        height: 20px;
-    }
+#findBtn:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 40px #00ff91;
+}
 
-    #sendPanel {
-        display: flex;
-        margin-top: 10px;
-        gap: 10px;
-    }
+#stopSearch {
+    display: none;
+    margin-top: 15px;
+    width: 100%;
+    padding: 14px;
+    background: #ff3b3b;
+    border-radius: 10px;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 0 20px #ff3b3b;
+}
 
-    #msgInput {
-        flex: 1;
-        padding: 12px;
-        border-radius: 12px;
-        border: none;
-        background: #222;
-        font-size: 17px;
-        color: white;
-    }
+/* СПИННЕР */
 
-    #sendBtn {
-        padding: 12px 25px;
-        background: #00ff91;
-        font-weight: bold;
-        font-size: 17px;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        box-shadow: 0 0 20px #00ff91;
-    }
+#spinner {
+    display: none;
+    margin: 15px auto;
+    border: 6px solid #333;
+    border-top: 6px solid #00ff91;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
 
-    #endBtn {
-        margin-top: 15px;
-        width: 100%;
-        padding: 14px;
-        background: #ff3b3b;
-        color: white;
-        border: none;
-        border-radius: 10px;
-        display: none;
-    }
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+/* -------------------- */
+/*         ЧАТ          */
+/* -------------------- */
+
+#chat {
+    display: none;
+    width: 70%;
+    margin: 20px auto;
+}
+
+#messages {
+    background: #0d0f12;
+    height: 430px;
+    overflow-y: auto;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 0 25px #00ff91;
+}
+
+.msg {
+    background: var(--msg-bg);
+    color: var(--text);
+    padding: 12px 16px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    max-width: 70%;
+    animation: fade 0.25s ease;
+}
+
+@keyframes fade {
+    from {opacity: 0; transform: translateY(10px);}
+    to {opacity: 1;}
+}
+
+#typing {
+    color: #888;
+    padding: 5px;
+    height: 20px;
+}
+
+#sendPanel {
+    display: flex;
+    margin-top: 10px;
+    gap: 10px;
+}
+
+#msgInput {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: var(--input-bg);
+    font-size: 17px;
+    color: var(--text);
+}
+
+#sendBtn {
+    padding: 12px 25px;
+    background: #00ff91;
+    font-weight: bold;
+    font-size: 17px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 0 20px #00ff91;
+}
+
+#endBtn {
+    margin-top: 15px;
+    width: 100%;
+    padding: 14px;
+    background: #ff3b3b;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    display: none;
+}
 
 </style>
 
@@ -195,14 +243,20 @@
 
 <body>
 
+<!-- ШАПКА -->
 <div id="header">
-    <div id="logo">RC</div>
-    <span class="glow">Ruslan Chat</span>
+    <div style="display:flex;align-items:center;gap:15px;">
+        <div id="logo">RC</div>
+        <span class="glow">Ruslan Chat</span>
+    </div>
+
+    <button id="themeBtn">Тёмная тема</button>
 </div>
 
+<!-- ГЛАВНОЕ МЕНЮ -->
 <div id="panel">
 
-    <div style="color:#0f0; font-size:18px;">Онлайн: <span id="online">0</span></div><br>
+    <div style="font-size:18px;">Онлайн: <span id="online">0</span></div><br>
 
     <label>Ваш пол:</label>
     <select id="gender">
@@ -224,6 +278,7 @@
     <button id="stopSearch">ПРЕКРАТИТЬ ПОИСК</button>
 </div>
 
+<!-- ЧАТ -->
 <div id="chat">
     <div id="messages"></div>
     <div id="typing"></div>
@@ -239,6 +294,21 @@
 <script>
 let socket = io();
 let typingTimer;
+
+/* -------------------- */
+/*   СМЕНА ТЕМЫ         */
+/* -------------------- */
+
+let dark = true;
+
+themeBtn.onclick = () => {
+    dark = !dark;
+    document.body.classList.toggle("light");
+
+    themeBtn.textContent = dark ? "Тёмная тема" : "Светлая тема";
+};
+
+/* -------------------- */
 
 socket.on("online_count", n => online.textContent = n);
 
@@ -258,7 +328,7 @@ stopSearch.onclick = () => {
     stopSearch.style.display = "none";
     findBtn.style.display = "block";
 
-    socket.emit("end");
+    socket.emit("cancel_search");
 };
 
 socket.on("chat_start", () => {
