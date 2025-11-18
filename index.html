@@ -1,268 +1,216 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>Ruslan Chat</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruslan Chat</title>
 
-<style>
-:root{
-  --accent:#6a4cff;
-  --bg:#0b0b0f;
-  --block:#15151b;
-  --text:#eee;
-}
+    <style>
+        body {
+            margin: 0;
+            background: #0f0f12;
+            color: white;
+            font-family: Arial;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+        }
 
-body{
-  margin:0;
-  padding:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Arial, sans-serif;
-}
+        #chat-container {
+            width: 380px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+        }
 
-.container{
-  width:100%;
-  max-width:450px;
-  margin:40px auto;
-  text-align:center;
-}
+        #status, #typingStatus {
+            font-size: 16px;
+            margin-bottom: 6px;
+            color: #bbb;
+        }
 
-/* LOGO */
-.logo{
-  font-size:36px;
-  font-weight:900;
-  color:var(--accent);
-  margin-bottom:20px;
-  text-shadow:0 0 25px var(--accent);
-  animation:fadeIn 1s ease;
-}
+        #typingStatus {
+            display: none;
+            font-style: italic;
+        }
 
-@keyframes fadeIn{
-  from{opacity:0; transform:translateY(-10px);}
-  to{opacity:1; transform:translateY(0);}
-}
+        #spinner {
+            display: none;
+            width: 26px;
+            height: 26px;
+            border: 4px solid #333;
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 8px auto;
+        }
 
-select,input{
-  width:100%;
-  padding:14px;
-  font-size:16px;
-  margin-top:12px;
-  border:none;
-  border-radius:10px;
-  background:var(--block);
-  color:white;
-  outline:none;
-  transition:0.3s;
-  box-shadow:0 0 0 rgba(0,0,0,0);
-}
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-select:focus,input:focus{
-  box-shadow:0 0 12px var(--accent);
-}
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
 
-/* BUTTONS */
-.btn{
-  width:100%;
-  padding:14px;
-  margin-top:15px;
-  background:var(--accent);
-  border:none;
-  border-radius:50px;
-  color:#fff;
-  font-size:18px;
-  cursor:pointer;
-  font-weight:bold;
-  transition:0.25s;
-  box-shadow:0 0 15px rgba(106,76,255,0.6);
-}
+        .msg {
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-radius: 10px;
+            max-width: 80%;
+            background: #1c1c21;
+        }
 
-.btn:hover{
-  filter:brightness(1.15);
-  transform:scale(1.03);
-}
+        .me {
+            background: #2a2a30;
+            margin-left: auto;
+        }
 
-/* CHAT AREA */
-#chat{
-  display:none;
-  animation:fadeIn 0.6s;
-}
+        #controls {
+            display: flex;
+            gap: 5px;
+        }
 
-#messages{
-  height:340px;
-  overflow-y:auto;
-  border-radius:10px;
-  padding:10px;
-  margin-bottom:10px;
-  background:var(--block);
-  box-shadow:0 0 15px rgba(0,0,0,0.4);
-}
+        #input {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background: #1b1b1f;
+            color: white;
+        }
 
-.message{
-  background:#1f1f27;
-  margin:8px 0;
-  padding:12px;
-  border-radius:10px;
-  text-align:left;
-  font-size:15px;
-  animation:fadeInMsg 0.3s;
-}
+        button {
+            padding: 8px 14px;
+            border: none;
+            background: #4a4af5;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
 
-@keyframes fadeInMsg{
-  from{opacity:0; transform:translateY(5px);}
-  to{opacity:1; transform:translateY(0);}
-}
+        #cancelBtn {
+            display: none;
+            background: #e03b3b;
+            margin-top: 6px;
+        }
 
-/* ROULETTE */
-.loader{
-  margin-top:20px;
-  display:none;
-}
-
-.spinner{
-  width:60px;
-  height:60px;
-  border:6px solid #333;
-  border-top-color:var(--accent);
-  border-radius:50%;
-  animation:spin 1s linear infinite;
-  margin:0 auto;
-}
-
-@keyframes spin{
-  to{transform:rotate(360deg);}
-}
-
-/* ONLINE COUNTER */
-.online{
-  margin-top:10px;
-  font-size:15px;
-  opacity:0.8;
-}
-
-</style>
+        #findBtn {
+            margin-top: 8px;
+        }
+    </style>
 </head>
 
 <body>
+<div id="chat-container">
 
-<div class="container">
+    <div id="status">Нажмите «Найти собеседника»</div>
+    <div id="typingStatus">Собеседник пишет…</div>
+    <div id="spinner"></div>
 
-  <div class="logo">RUSLAN CHAT 💬</div>
+    <div id="messages"></div>
 
-  <div class="online" id="onlineCount">В сети: 0</div>
+    <div id="controls">
+        <input id="input" type="text" placeholder="Введите сообщение…">
+        <button id="sendBtn">→</button>
+    </div>
 
-  <div id="menu">
-
-      <select id="myGender">
-        <option value="m">Я — мужчина</option>
-        <option value="f">Я — женщина</option>
-      </select>
-
-      <select id="seekGender">
-        <option value="a">Ищу — любой</option>
-        <option value="m">Ищу — мужчину</option>
-        <option value="f">Ищу — женщину</option>
-      </select>
-
-      <button class="btn" onclick="startSearch()">Найти собеседника</button>
-
-      <div class="loader" id="loader">
-         <div class="spinner"></div>
-         <div style="margin-top:10px;">Поиск...</div>
-      </div>
-
-  </div>
-
-  <div id="chat">
-      <div id="messages"></div>
-      <input id="msgInput" placeholder="Введите сообщение...">
-      <button class="btn" onclick="sendMsg()">Отправить</button>
-      <button class="btn" onclick="endChat()">Отключиться</button>
-  </div>
+    <button id="findBtn">Найти собеседника</button>
+    <button id="cancelBtn">Прекратить поиск</button>
 
 </div>
 
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-const socket = io();
-let roomId = null;
+    const socket = io();
 
-const menu = document.getElementById("menu");
-const chat = document.getElementById("chat");
-const messagesEl = document.getElementById("messages");
-const msgInput = document.getElementById("msgInput");
-const loader = document.getElementById("loader");
-const onlineCount = document.getElementById("onlineCount");
+    const status = document.getElementById("status");
+    const spinner = document.getElementById("spinner");
+    const typingStatus = document.getElementById("typingStatus");
+    const messages = document.getElementById("messages");
+    const input = document.getElementById("input");
+    const sendBtn = document.getElementById("sendBtn");
+    const findBtn = document.getElementById("findBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
 
-socket.on("online_count", n=>{
-  onlineCount.innerText = "В сети: " + n;
-});
+    let connected = false;
+    let typingTimeout;
 
-function startSearch(){
-  loader.style.display="block";
+    function addMsg(text, me = false) {
+        const div = document.createElement("div");
+        div.className = "msg" + (me ? " me" : "");
+        div.textContent = text;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    }
 
-  const myGender = document.getElementById("myGender").value;
-  const seekGender = document.getElementById("seekGender").value;
+    // поиск
+    findBtn.onclick = () => {
+        status.textContent = "Поиск собеседника...";
+        spinner.style.display = "block";
+        cancelBtn.style.display = "block";
+        findBtn.style.display = "none";
+        socket.emit("find");
+    };
 
-  socket.emit("join_queue", {
-    myGender,
-    seekingGender: seekGender
-  });
+    // отмена
+    cancelBtn.onclick = () => {
+        socket.emit("cancel_search");
+        status.textContent = "Поиск остановлен";
+        spinner.style.display = "none";
+        cancelBtn.style.display = "none";
+        findBtn.style.display = "block";
+    };
 
-  menu.style.display="none";
-}
+    // найден собеседник
+    socket.on("partner_found", () => {
+        connected = true;
+        spinner.style.display = "none";
+        cancelBtn.style.display = "none";
+        findBtn.style.display = "none";
+        status.textContent = "Собеседник найден!";
+    });
 
-socket.on("matched", data => {
-  roomId = data.roomId;
-  loader.style.display="none";
-  chat.style.display="block";
-});
+    // получение сообщений
+    socket.on("message", msg => {
+        addMsg("Собеседник: " + msg, false);
+    });
 
-function sendMsg(){
-  if(!msgInput.value.trim()) return;
-  socket.emit("message", { roomId, text: msgInput.value });
-  addMsg("Вы: " + msgInput.value);
-  msgInput.value="";
-}
+    // отправка сообщения
+    sendBtn.onclick = () => {
+        const text = input.value.trim();
+        if (!text || !connected) return;
 
-socket.on("message", data => {
-  addMsg("Собеседник: " + data.text);
-});
+        socket.emit("message", text);
+        addMsg("Вы: " + text, true);
+        input.value = "";
+        socket.emit("typing_stop");
+    };
 
-function addMsg(t){
-  const div = document.createElement("div");
-  div.className="message";
-  div.innerText=t;
-  messagesEl.appendChild(div);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-}
+    // отправка по Enter
+    input.onkeydown = e => {
+        if (e.key === "Enter") {
+            sendBtn.onclick();
+        } else {
+            socket.emit("typing");
+        }
+    };
 
-function endChat(){
-  if(roomId) socket.emit("end", { roomId });
-  roomId=null;
-  chat.style.display="none";
-  menu.style.display="block";
-}
+    // индикатор "пишет"
+    socket.on("typing", () => {
+        typingStatus.style.display = "block";
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(() => {
+            typingStatus.style.display = "none";
+        }, 1500);
+    });
 
-socket.on("ended", ()=>{
-  alert("Собеседник отключился");
-  roomId=null;
-  chat.style.display="none";
-  menu.style.display="block";
-});
+    socket.on("typing_stop", () => {
+        typingStatus.style.display = "none";
+    });
 
-socket.on("force_end_from_disconnect", ()=>{
-  if(roomId){
-    alert("Собеседник вышел");
-    roomId=null;
-    chat.style.display="none";
-    menu.style.display="block";
-  }
-});
-
-window.onbeforeunload = () => {
-  if(roomId) socket.emit("end", { roomId });
-};
 </script>
+
 </body>
 </html>
