@@ -9,7 +9,6 @@
 <meta name="description" content="Ruslan Chat — анонимный чат для общения с незнакомцами. Быстрый поиск собеседника, неоновый дизайн, полностью бесплатный. Общайся без регистрации.">
 <meta name="keywords" content="анонимный чат, чат рандом, чат рулетка, ruslan chat, знакомство, случайный собеседник">
 <meta name="author" content="Ruslan">
-
 <meta property="og:title" content="Ruslan Chat — Анонимный чат">
 <meta property="og:description" content="Находи собеседников за 5 секунд. Полная анонимность. Без регистрации.">
 <meta property="og:type" content="website">
@@ -189,8 +188,33 @@ select {
 }
 
 #typing {
-    height: 20px;
-    color: #999;
+    height: 22px;
+    font-size: 15px;
+    color: #00ff91;
+}
+
+/* dots animation */
+.typing-dots {
+    display: inline-block;
+    width: 30px;
+    text-align: left;
+}
+.typing-dots span {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: #00ff91;
+    border-radius: 50%;
+    margin-right: 4px;
+    animation: blink 1s infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: .2s; }
+.typing-dots span:nth-child(3) { animation-delay: .4s; }
+
+@keyframes blink {
+    0% { opacity: .2; }
+    50% { opacity: 1; }
+    100% { opacity: .2; }
 }
 
 #sendPanel {
@@ -240,7 +264,10 @@ select {
     z-index: 999;
 }
 
-.reaction { cursor: pointer; font-size: 20px; }
+.reaction {
+    cursor: pointer;
+    font-size: 20px;
+}
 .reaction:hover { transform: scale(1.2); }
 
 .msg-react {
@@ -249,9 +276,7 @@ select {
     opacity: .95;
 }
 
-/* --------------------------
-   ФАКТ ДНЯ — ОКНО
----------------------------*/
+/* ---------- ФАКТ ДНЯ ---------- */
 
 #factBox {
     position: fixed;
@@ -299,7 +324,6 @@ select {
     <p id="factText" style="text-align:center;font-size:15px;"></p>
 </div>
 
-
 <div id="header">
     <div style="display:flex;align-items:center;gap:12px;">
         <div id="logo">RC</div>
@@ -311,7 +335,7 @@ select {
 
 <div id="myStatus"></div>
 
-<div style="text-align:center; margin-top:5px; font-size:18px; color:var(--text);" class="glow">
+<div style="text-align:center; margin-top:5px; font-size:18px;" class="glow">
     9 из 10 находят интересного собеседника за 5 секунд
 </div>
 
@@ -339,7 +363,6 @@ select {
     <button id="shareBtn">Поделиться сайтом</button>
 </div>
 
-
 <div id="chat">
     <div id="partnerStatus" style="text-align:center;color:#00ff91;margin-bottom:8px;"></div>
     <div id="messages"></div>
@@ -353,9 +376,7 @@ select {
     <button id="endBtn">Завершить чат</button>
 </div>
 
-
-
-<!-- меню реакций (скрыто) -->
+<!-- Меню реакций -->
 <div id="reactionMenu" class="reaction-menu" style="display:none;">
     <div class="reaction">❤️</div>
     <div class="reaction">😂</div>
@@ -364,12 +385,13 @@ select {
     <div class="reaction">❗</div>
 </div>
 
+
 <script>
 
 let socket = io();
 let typingTimer;
 
-/* -------- ФАКТ ДНЯ ---------- */
+/* --------- Факт дня ---------- */
 
 const facts = [
 "В среднем человек открывается незнакомцу в 2 раза быстрее.",
@@ -383,37 +405,24 @@ const facts = [
 "Люди читают сообщения дольше, чем ты думаешь.",
 "Хороший собеседник — редкость.",
 "Каждый день в чатах рождаются тысячи мини-историй.",
-"Анонимность делает людей честнее.",
-"Некоторые диалоги забываются, некоторые — нет.",
-"Твой собеседник сейчас тоже чего-то ждёт.",
-"90% недооценивают, насколько они интересны.",
-"Каждый второй остаётся дольше, чем планировал.",
-"Один диалог может изменить настроение на весь день.",
-"Многие приходят «на минуту», а остаются на час.",
-"Самые тёплые разговоры — с теми, кого не знаешь.",
-"Люди чаще делятся мечтами с незнакомцами."
+"Анонимность делает людей честнее."
 ];
 
 window.onload = () => {
     let box = document.getElementById("factBox");
     let text = document.getElementById("factText");
     text.textContent = facts[Math.floor(Math.random() * facts.length)];
-
     box.style.display = "block";
     setTimeout(() => box.classList.add("show"), 20);
 
-    document.getElementById("factClose").onclick = () => {
+    factClose.onclick = () => {
         box.classList.remove("show");
         setTimeout(() => box.style.display = "none", 250);
     };
 
-    // set my status on load
     let chatCount = +localStorage.getItem("chatCount") || 0;
-    document.getElementById("myStatus").textContent =
-        getStatus(chatCount) ? "Ваш статус: " + getStatus(chatCount) : "";
+    myStatus.textContent = getStatus(chatCount) ? "Ваш статус: " + getStatus(chatCount) : "";
 };
-
-/* -------------------------------------------------- */
 
 function getStatus(n) {
     if (n >= 50) return "Популярный собеседник 👑";
@@ -422,36 +431,30 @@ function getStatus(n) {
     return "";
 }
 
+/* -------------------------------------------------- */
+
 themeBtn.onclick = () => {
     document.body.classList.toggle("light");
-    themeBtn.textContent =
-        document.body.classList.contains("light") ?
-        "Светлая тема" : "Тёмная тема";
 };
 
 shareBtn.onclick = () => {
-    const url = "https://ruslan-chat2.onrender.com/";
-    if (navigator.share) navigator.share({ title: "Ruslan Chat", url });
-    else {
-        navigator.clipboard.writeText(url);
-        alert("Ссылка скопирована!");
-    }
+    const url = location.href;
+    if (navigator.share) navigator.share({ title:"Ruslan Chat", url });
+    else navigator.clipboard.writeText(url);
 };
 
 socket.on("online_count", n => online.textContent = n);
 
-/* Поиск теперь отправляет chatCount */
+/* Поиск собеседника */
 findBtn.onclick = () => {
     spinner.style.display = "block";
     stopSearch.style.display = "block";
     findBtn.style.display = "none";
 
-    const chatCount = +localStorage.getItem("chatCount") || 0;
-
     socket.emit("find", {
         gender: gender.value,
         searchfor: searchfor.value,
-        chatCount: chatCount
+        chatCount: +localStorage.getItem("chatCount") || 0
     });
 };
 
@@ -460,20 +463,20 @@ stopSearch.onclick = () => {
     spinner.style.display = "none";
     stopSearch.style.display = "none";
     findBtn.style.display = "block";
-
     socket.emit("cancel_search");
 };
 
-/* Начало чата - теперь сервер шлёт partnerChatCount */
-socket.on("chat_start", (data) => {
+/* Чат найден */
+socket.on("chat_start", data => {
     panel.style.display = "none";
     chat.style.display = "block";
     messages.innerHTML = "";
     typing.innerHTML = "";
 
-    // показать статус собеседника (если сервер передал)
-    const partnerCount = data && data.partnerChatCount ? data.partnerChatCount : 0;
-    partnerStatus.textContent = "Собеседник: " + (getStatus(partnerCount) || "Новый собеседник");
+    partnerStatus.textContent =
+        getStatus(data.partnerChatCount) ?
+        "Собеседник: " + getStatus(data.partnerChatCount) :
+        "Собеседник: Новый собеседник";
 
     endBtn.style.display = "block";
 });
@@ -495,110 +498,98 @@ function sendMsg() {
 
 socket.on("msg", txt => append("Собеседник: " + txt, "other"));
 
-function append(t, from = "self") {
+/* Сообщение добавляется */
+function append(text, from) {
     let d = document.createElement("div");
     d.className = "msg";
-    d.textContent = t;
+    d.dataset.from = from;
+    d.textContent = text;
 
-    // span для реакции
     let r = document.createElement("span");
     r.className = "msg-react";
-    r.textContent = "";
     d.appendChild(r);
 
-    // сохранить флаг кто отправил
-    d.dataset.from = from;
-
-    // клик открывает меню реакций (только для not-self messages)
-    d.addEventListener("click", (e) => openReactionMenu(e, d));
+    d.addEventListener("click", (e) => openMenu(e, d));
 
     messages.appendChild(d);
     messages.scrollTop = messages.scrollHeight;
 }
 
-/* печатает */
+/* typing dots animation */
 socket.on("typing", () => {
-    typing.textContent = "Собеседник печатает...";
+    typing.innerHTML = `
+        <div class="typing-dots">
+            <span></span><span></span><span></span>
+        </div>
+    `;
     clearTimeout(typingTimer);
-    typingTimer = setTimeout(() => typing.textContent = "", 1500);
+    typingTimer = setTimeout(() => typing.innerHTML = "", 1500);
 });
 
-/* РЕАКЦИИ: меню и логика (одна реакция на сообщение) */
+/* Меню реакций */
 let reactionMenu = document.getElementById("reactionMenu");
 let selectedMsg = null;
 
-function openReactionMenu(e, msg) {
-    // не открываем меню для своих сообщений (начинающихся с "Вы:")
+function openMenu(e, msg) {
     if (msg.dataset.from === "self") return;
 
+    e.stopPropagation();
     selectedMsg = msg;
-    // позиционируем меню рядом с курсором, с корректировкой
-    const offsetX = 10, offsetY = 10;
-    reactionMenu.style.left = (e.pageX + offsetX) + "px";
-    reactionMenu.style.top = (e.pageY + offsetY) + "px";
+
+    reactionMenu.style.left = e.pageX + "px";
+    reactionMenu.style.top = e.pageY + "px";
     reactionMenu.style.display = "flex";
 }
 
-// выбор реакции
+/* Установка реакции */
 document.querySelectorAll(".reaction").forEach(r => {
-    r.onclick = (ev) => {
-        ev.stopPropagation();
+    r.onclick = (e) => {
+        e.stopPropagation();
         if (!selectedMsg) return;
-        const emoji = r.textContent;
 
-        // установить (заменить) реакцию в DOM (одна реакция)
+        let emoji = r.textContent;
         selectedMsg.querySelector(".msg-react").textContent = emoji;
 
-        // послать партнёру (index — позиция в messages)
-        const index = Array.from(messages.children).indexOf(selectedMsg);
+        let index = Array.from(messages.children).indexOf(selectedMsg);
         socket.emit("reaction", { emoji, index });
 
         reactionMenu.style.display = "none";
     };
 });
 
-// получить реакцию от партнёра
-socket.on("reaction", (data) => {
-    if (!data) return;
-    const msg = messages.children[data.index];
-    if (msg) {
-        msg.querySelector(".msg-react").textContent = data.emoji;
-    }
+/* Получение реакции */
+socket.on("reaction", data => {
+    let msg = messages.children[data.index];
+    if (msg) msg.querySelector(".msg-react").textContent = data.emoji;
 });
 
-// скрыть меню при клике вне
-document.body.addEventListener("click", (e) => {
-    if (!reactionMenu.contains(e.target)) reactionMenu.style.display = "none";
-});
+/* Скрытие меню */
+document.body.onclick = () => {
+    reactionMenu.style.display = "none";
+};
 
-/* Завершить чат */
-endBtn.onclick = () => socket.emit("end");
+/* Завершение чата */
+endBtn.onclick = () => {
+    socket.emit("end");
+};
 
-/* При завершении чата — очищаем UI и увеличиваем chatCount */
 socket.on("chat_end", () => {
     chat.style.display = "none";
     panel.style.display = "block";
+
     spinner.style.display = "none";
     stopSearch.style.display = "none";
     findBtn.style.display = "block";
 
     messages.innerHTML = "";
-
-    // увеличиваем локальный счетчик завершённых чатов
-    let chatCount = +localStorage.getItem("chatCount") || 0;
-    chatCount++;
-    localStorage.setItem("chatCount", chatCount);
-
-    // обновляем свой статус в меню
-    document.getElementById("myStatus").textContent =
-        getStatus(chatCount) ? "Ваш статус: " + getStatus(chatCount) : "";
-
-    // очистка статуса партнёра
     partnerStatus.textContent = "";
-});
 
-/* Онлайн */
-socket.on("online_count", n => online.textContent = n);
+    let chatCount = +localStorage.getItem("chatCount") || 0;
+    localStorage.setItem("chatCount", ++chatCount);
+
+    myStatus.textContent =
+        getStatus(chatCount) ? "Ваш статус: " + getStatus(chatCount) : "";
+});
 
 </script>
 
