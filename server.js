@@ -100,18 +100,17 @@ io.on("connection", socket => {
     });
 
     /* Завершить чат */
-    socket.on("end", () => {
-        const partner = getPartner(socket.id);
+socket.on('end', () => {
+    const partner = socket.partner;
 
-        if (partner) {
-            io.to(partner).emit("chat_end");
-        }
+    if (partner) {
+        partner.emit('chat_end');
+        partner.partner = null;
+    }
 
-        // удаляем из очереди если есть
-        waiting = waiting.filter(id => id !== socket.id);
-
-        disconnectPair(socket.id);
-    });
+    socket.emit('chat_end');
+    socket.partner = null;
+});
 
     /* Отключение */
     socket.on("disconnect", () => {
