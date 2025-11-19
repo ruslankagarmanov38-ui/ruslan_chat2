@@ -1,18 +1,18 @@
 const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
+
 const io = require("socket.io")(http, {
     cors: { origin: "*" }
 });
 
-app.use(express.static("public")); // index.html в папке public
+app.use(express.static("public")); // index.html лежит в /public
 
 // ===============================
-// ПАМЯТЬ
+// ДАННЫЕ
 // ===============================
-let waiting = [];        // очередь
-let partners = {};       // socketId → partnerId
-let chatData = {};       // socketId → {partner, chatCount}
+let waiting = [];        // очередь пользователей
+let partners = {};       // socket.id → partner.id
 
 // ===============================
 // Получить партнера
@@ -22,9 +22,9 @@ function getPartner(id) {
 }
 
 // ===============================
-// Разъединить пару
+// Разорвать связь
 // ===============================
-function disconnectPair(id) {
+function unlink(id) {
     const p = partners[id];
 
     if (p) {
@@ -34,102 +34,91 @@ function disconnectPair(id) {
 }
 
 // ===============================
-// MAIN SOCKET LOGIC
+// ЛОГИКА SOCKET.IO
 // ===============================
 io.on("connection", socket => {
 
-    io.emit("online_count", io.engine.clientsCount);
-    console.log("User connected:", socket.id);
+    io.emit("online", io.engine.clientsCount);
 
-    // ========== ПОИСК ==========
+    console.log("🟢 Подключился:", socket.id);
+
+    // ====== ПОИСК ======
     socket.on("find", data => {
-        const userCount = data.chatCount || 0;
 
-        // есть ли кто-то в очереди?
+        // Если кто-то уже ждёт — соединяем
         if (waiting.length > 0) {
+
             const partner = waiting.shift();
 
             partners[socket.id] = partner;
             partners[partner] = socket.id;
 
-            chatData[socket.id] = { partner, chatCount: userCount };
-            chatData[partner] = { partner: socket.id, chatCount: chatData[partner].chatCount || 0 };
-
-            // отправляем старт
-            socket.emit("chat_start", {
-                partnerChatCount: chatData[partner].chatCount
-            });
-
-            io.to(partner).emit("chat_start", {
-                partnerChatCount: userCount
-            });
+            // Отправляем обоим, что чат найден
+            socket.emit("found");
+            io.to(partner).emit("found");
 
         } else {
-            // добавляем пользователя в очередь
+
+            // Иначе — ставим в очередь
             waiting.push(socket.id);
-            chatData[socket.id] = { partner: null, chatCount: userCount };
         }
     });
 
-    // ========== ОТМЕНА ПОИСКА ==========
-    socket.on("cancel_search", () => {
+    // ====== ОТМЕНА ПОИСКА ======
+    socket.on("stop", () => {
         waiting = waiting.filter(id => id !== socket.id);
     });
 
-    // ========== СООБЩЕНИЯ ==========
+    // ====== СООБЩЕНИЯ ======
     socket.on("msg", txt => {
-        const partner = getPartner(socket.id);
-        if (partner) io.to(partner).emit("msg", txt);
+        const p = getPartner(socket.id);
+        if (p) io.to(p).emit("msg", txt);
     });
 
-    // ========== ПЕЧАТАЕТ ==========
+    // ====== ПЕЧАТАЕТ ======
     socket.on("typing", () => {
-        const partner = getPartner(socket.id);
-        if (partner) io.to(partner).emit("typing");
+        const p = getPartner(socket.id);
+        if (p) io.to(p).emit("typing");
     });
 
-    // ========== РЕАКЦИИ ==========
-    socket.on("reaction", data => {
-        const partner = getPartner(socket.id);
-        if (partner) io.to(partner).emit("reaction", data);
-    });
-
-    // ========== ЗАВЕРШЕНИЕ ЧАТА ==========
+    // ====== ЗАВЕРШИТЬ ЧАТ ======
     socket.on("end", () => {
-        const partnerId = getPartner(socket.id);
+        const p = getPartner(socket.id);
 
-        if (partnerId) {
-            io.to(partnerId).emit("chat_end");
-            disconnectPair(socket.id);
+        if (p) {
+            io.to(p).emit("end");
+            unlink(socket.id);
         }
 
-        socket.emit("chat_end");
+        socket.emit("end");
     });
 
-    // ========== ОТКЛЮЧЕНИЕ ==========
+    // ====== ОТКЛЮЧЕНИЕ ======
     socket.on("disconnect", () => {
-        console.log("User disconnected:", socket.id);
 
+        console.log("🔴 Отключился:", socket.id);
+
+        // убрать из очереди
         waiting = waiting.filter(id => id !== socket.id);
 
-        const partner = getPartner(socket.id);
-        if (partner) {
-            io.to(partner).emit("chat_end");
-            disconnectPair(socket.id);
+        // если был партнёр — уведомить
+        const p = getPartner(socket.id);
+        if (p) {
+            io.to(p).emit("end");
+            unlink(socket.id);
         }
 
-        io.emit("online_count", io.engine.clientsCount);
+        io.emit("online", io.engine.clientsCount);
     });
 });
 
 // ===============================
-// START SERVER
+// СТАРТ СЕРВЕРА
 // ===============================
 const PORT = process.env.PORT || 8080;
 http.listen(PORT, () => {
     console.log("================================");
     console.log("🚀 Сервер запущен на порту:", PORT);
-    console.log("🌍 Локальный адрес: http://localhost:" + PORT);
+    console.log("🌍 http://localhost:" + PORT);
     console.log("================================");
 });
-
