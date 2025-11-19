@@ -5,122 +5,138 @@ const io = require("socket.io")(http, {
     cors: { origin: "*" }
 });
 
-app.use(express.static(__dirname + "/public"));
+app.use(express.static("public")); // index.html находится в /public
 
-let queue = [];            // очередь на поиск
-let pairs = {};            // socket.id -> partnerId
-let userData = {};         // данные пользователей (пол + статус)
+// ===============================
+// ПАМЯТЬ
+// ===============================
+let waiting = []; // очередь
+let partners = {}; // {socketId: партнёр}
+let chatData = {}; // {socketId: {partner: id, chatCount: number}}
 
+// ===============================
+// ПОЛУЧИТЬ ПАРТНЁРА
+// ===============================
+function getPartner(id) {
+    return partners[id];
+}
 
-// ----------- ПОЛЬЗОВАТЕЛЬ ПОДКЛЮЧЕН -------------
+// ===============================
+// РАЗЪЕДИНИТЬ
+// ===============================
+function disconnectPair(id) {
+    const p = partners[id];
+    if (p) {
+        partners[p] = null;
+        delete partners[p];
+    }
+    partners[id] = null;
+    delete partners[id];
+}
+
+// ===============================
+// НАЧАЛО
+// ===============================
 io.on("connection", socket => {
 
-    // обновить количество онлайн
+    /* передаём количество онлайн */
     io.emit("online_count", io.engine.clientsCount);
 
+    console.log("User connected:", socket.id);
 
-    // ---------- Поиск собеседника ----------
+    /* Когда пользователь ищет собеседника */
     socket.on("find", data => {
-        userData[socket.id] = {
-            gender: data.gender,
-            searchfor: data.searchfor,
-            chatCount: data.chatCount || 0
-        };
+        let userChatCount = data.chatCount || 0;
 
-        // если очередь пуста — добавляем
-        if (queue.length === 0) {
-            queue.push(socket.id);
-            return;
+        // Если кто-то ожидает — соединяем
+        if (waiting.length > 0) {
+            const partner = waiting.shift();
+
+            partners[socket.id] = partner;
+            partners[partner] = socket.id;
+
+            // сохраняем данные
+            chatData[socket.id] = { partner, chatCount: userChatCount };
+            chatData[partner] = { partner: socket.id, chatCount: chatData[partner].chatCount };
+
+            // отправляем старт чата
+            socket.emit("chat_start", {
+                partnerChatCount: chatData[partner].chatCount
+            });
+
+            io.to(partner).emit("chat_start", {
+                partnerChatCount: userChatCount
+            });
+
+        } else {
+            // добавляем в очередь
+            waiting.push(socket.id);
+            chatData[socket.id] = { partner: null, chatCount: userChatCount };
         }
-
-        // иначе пробуем найти пару
-        let partnerId = queue.shift();
-
-        if (!partnerId || partnerId === socket.id) return;
-
-        // связываем
-        pairs[socket.id] = partnerId;
-        pairs[partnerId] = socket.id;
-
-        let myData = userData[socket.id];
-        let partnerData = userData[partnerId];
-
-        // отправляем обоим "начало чата"
-        io.to(socket.id).emit("chat_start", {
-            partnerChatCount: partnerData.chatCount
-        });
-
-        io.to(partnerId).emit("chat_start", {
-            partnerChatCount: myData.chatCount
-        });
     });
 
-
-    // ---------- Отмена поиска ----------
+    /* Отмена поиска */
     socket.on("cancel_search", () => {
-        queue = queue.filter(id => id !== socket.id);
+        waiting = waiting.filter(id => id !== socket.id);
     });
 
-
-    // ---------- Сообщения ----------
+    /* Сообщение */
     socket.on("msg", txt => {
-        let partner = pairs[socket.id];
+        const partner = getPartner(socket.id);
         if (partner) io.to(partner).emit("msg", txt);
     });
 
-
-    // ---------- Тайпинг ----------
+    /* Печатает */
     socket.on("typing", () => {
-        let partner = pairs[socket.id];
+        const partner = getPartner(socket.id);
         if (partner) io.to(partner).emit("typing");
     });
 
-
-    // ---------- Реакции ----------
+    /* Реакция */
     socket.on("reaction", data => {
-        let partner = pairs[socket.id];
-        if (partner) io.to(partner).emit("reaction", data);
+        const partner = getPartner(socket.id);
+        if (!partner) return;
+        io.to(partner).emit("reaction", data);
     });
 
-
-    // ---------- Завершение чата ----------
+    /* Завершить чат */
     socket.on("end", () => {
-        let partner = pairs[socket.id];
+        const partner = getPartner(socket.id);
 
         if (partner) {
             io.to(partner).emit("chat_end");
         }
 
-        io.to(socket.id).emit("chat_end");
+        // удаляем из очереди если есть
+        waiting = waiting.filter(id => id !== socket.id);
 
-        delete pairs[partner];
-        delete pairs[socket.id];
+        disconnectPair(socket.id);
     });
 
-
-    // ---------- Отключение ----------
+    /* Отключение */
     socket.on("disconnect", () => {
-        // убрать из очереди
-        queue = queue.filter(id => id !== socket.id);
+        console.log("User disconnected:", socket.id);
 
-        let partner = pairs[socket.id];
+        waiting = waiting.filter(id => id !== socket.id);
+
+        const partner = getPartner(socket.id);
         if (partner) {
             io.to(partner).emit("chat_end");
-            delete pairs[partner];
+            disconnectPair(socket.id);
         }
-
-        delete pairs[socket.id];
-        delete userData[socket.id];
 
         io.emit("online_count", io.engine.clientsCount);
     });
 });
 
-
+// ===============================
+// SERVER START
+// ===============================
 const PORT = process.env.PORT || 8080;
 http.listen(PORT, () => {
-    console.log("======================================");
+    console.log("================================");
     console.log("🚀 Сервер запущен на порту:", PORT);
     console.log("🌍 Локальный адрес: http://localhost:" + PORT);
-    console.log("======================================");
+    console.log("================================");
 });
+
