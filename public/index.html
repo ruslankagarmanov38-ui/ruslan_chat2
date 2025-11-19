@@ -19,9 +19,7 @@
 
 <style>
 
-/* -------------------- */
-/*         ТЕМЫ         */
-/* -------------------- */
+/* ТЕМЫ */
 :root {
     --bg: #000;
     --text: #0f0;
@@ -53,9 +51,7 @@ body {
     text-shadow: 0 0 10px #00ff91, 0 0 20px #00ff91, 0 0 40px #00ff91;
 }
 
-/* -------------------- */
-/*        ШАПКА         */
-/* -------------------- */
+/* ШАПКА */
 #header {
     display: flex;
     justify-content: space-between;
@@ -83,14 +79,11 @@ body {
     box-shadow: 0 0 18px var(--logo-bg);
 }
 
-/* -------------------- */
-/*     РЕЙТИНГ БЛОК     */
-/* -------------------- */
-
+/* РЕЙТИНГ — новый блок */
 #ratingBox {
   width: 70%;
-  margin: -6px auto 10px;
-  padding: 12px 14px;
+  margin: 6px auto 10px;
+  padding: 10px 14px;
   border-radius: 12px;
   background: rgba(0,255,145,0.03);
   border: 1px solid rgba(0,255,145,0.12);
@@ -98,7 +91,7 @@ body {
   text-align: center;
   box-shadow: 0 0 12px rgba(0,255,145,0.06);
   font-size: 14px;
-  line-height: 1.45;
+  line-height: 1.4;
 }
 
 #ratingBox .title {
@@ -132,10 +125,7 @@ body {
   font-weight: 700;
 }
 
-
-/* -------------------- */
-/*    ГЛАВНАЯ ПАНЕЛЬ    */
-/* -------------------- */
+/* ГЛАВНАЯ ПАНЕЛЬ */
 #panel {
     width: 70%;
     margin: 20px auto;
@@ -145,71 +135,134 @@ body {
     box-shadow: 0 0 25px #00ff91;
 }
 
-/* ... весь твой старый красивый код ... */
-/* (ОСТАЛОСЬ ВСЁ) */
+label {
+    margin-bottom: 5px;
+    font-size: 18px;
+    display: block;
+}
 
+select {
+    width: 180px;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+}
 
-
-/* -------------------------- */
-/*     ФАКТ ДНЯ — ОКНО        */
-/* -------------------------- */
-
-#factBox {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(.8);
-    width: 300px;
+/* КНОПКИ */
+#findBtn, #shareBtn {
+    width: 100%;
     padding: 18px;
-    background: rgba(0,0,0,0.92);
-    border-radius: 14px;
-    border: 2px solid #00ff91;
-    box-shadow: 0 0 20px #00ff91;
-    opacity: 0;
-    transition: .25s ease;
-    z-index: 9999;
-    color: #fff;
-    display: none;
-}
-
-#factBox.show {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-}
-
-#factClose {
-    position: absolute;
-    right: 12px;
-    top: 6px;
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    background: #00ff66;
+    border-radius: 12px;
+    border: none;
     cursor: pointer;
-    font-size: 18px;
-    color: #00ff91;
+    box-shadow: 0 0 20px #00ff91;
 }
 
+#findBtn:hover, #shareBtn:hover {
+    transform: scale(1.03);
+}
 
-/* --------------------------- */
-/*        ЧАТ + РЕАКЦИИ        */
-/* --------------------------- */
-
-.reaction-menu {
-    position: absolute;
-    background: rgba(0,255,80,0.15);
-    border: 1px solid #00ff91;
-    padding: 6px 8px;
+/* ОТМЕНА ПОИСКА */
+#stopSearch {
+    display: none;
+    width: 100%;
+    padding: 14px;
+    background: #ff3b3b;
     border-radius: 10px;
-    display: flex;
-    gap: 6px;
-    box-shadow: 0 0 12px #00ff91;
-    z-index: 999;
+    border: none;
+    color: white;
+    margin-top: 15px;
 }
 
-.reaction { cursor: pointer; font-size: 20px; }
-.reaction:hover { transform: scale(1.2); }
+/* СПИННЕР */
+#spinner {
+    display: none;
+    margin: 15px auto;
+    width: 50px;
+    height: 50px;
+    border: 6px solid #333;
+    border-top: 6px solid #00ff91;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
 
-.msg-react {
-    font-size: 18px;
-    margin-left: 8px;
-    opacity: .95;
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+/* ЧАТ */
+#chat {
+    display: none;
+    width: 70%;
+    margin: 20px auto;
+}
+
+#messages {
+    background: #0d0f12;
+    height: 430px;
+    overflow-y: auto;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 0 25px #00ff91;
+}
+
+.msg {
+    background: var(--msg-bg);
+    color: var(--text);
+    padding: 12px 16px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    max-width: 70%;
+    animation: fade .25s ease;
+    position: relative;
+}
+
+@keyframes fade {
+    from {opacity: 0; transform: translateY(10px);}
+    to {opacity: 1;}
+}
+
+#typing {
+    height: 20px;
+    color: #999;
+}
+
+#sendPanel {
+    display: flex;
+    margin-top: 10px;
+    gap: 10px;
+}
+
+#msgInput {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    background: var(--input-bg);
+    color: var(--text);
+}
+
+#sendBtn {
+    padding: 12px 25px;
+    background: #00ff91;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+#endBtn {
+    margin-top: 15px;
+    width: 100%;
+    padding: 14px;
+    background: #ff3b3b;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    display: none;
 }
 
 </style>
@@ -219,45 +272,41 @@ body {
 
 <body>
 
-<!-- Факт дня -->
-<div id="factBox">
-    <div id="factClose">✖</div>
+<!-- ФАКТ ДНЯ -->
+<div id="factBox" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.8);width:300px;padding:18px;background:rgba(0,0,0,0.92);border-radius:14px;border:2px solid #00ff91;box-shadow:0 0 20px #00ff91;opacity:0;transition:.25s ease;z-index:9999;color:#fff;display:none;">
+    <div id="factClose" style="position:absolute;right:12px;top:6px;cursor:pointer;font-size:18px;color:#00ff91;">✖</div>
     <h3 style="text-align:center;margin-top:5px;color:#00ff91;" class="glow">Факт дня</h3>
     <p id="factText" style="text-align:center;font-size:15px;"></p>
 </div>
 
-
-<!-- ---------------- -->
-<!--   ШАПКА + ТЕМА   -->
-<!-- ---------------- -->
 <div id="header">
     <div style="display:flex;align-items:center;gap:12px;">
         <div id="logo">RC</div>
         <span class="glow">Ruslan Chat</span>
     </div>
+
     <button id="themeBtn">Тёмная тема</button>
 </div>
 
-
-<!-- ------------------ -->
-<!--   РЕЙТИНГ-БЛОК     -->
-<!-- ------------------ -->
+<!-- РЕЙТИНГ -->
 <div id="ratingBox">
-  <div class="title">⭐ Как работает рейтинг?</div>
-  Общайтесь чаще — повышайте свой уровень. Ваш статус видят собеседники при подключении.
+  <div class="title">⭐ Как работает рейтинг собеседника?</div>
+
+  <div class="desc">
+    Каждый завершённый чат повышает ваш уровень.  
+    Ваш статус видят другие при подключении.
+  </div>
+
   <div class="levels">
     <div class="level">🟢 Новый — 0+</div>
     <div class="level">🔵 Хороший — 10+</div>
     <div class="level">🟣 Опытный — 25+</div>
     <div class="level">👑 Популярный — 50+</div>
   </div>
+
   <div id="ratingYou" class="you">Ваш уровень: —</div>
 </div>
 
-
-<!-- ---------------------- -->
-<!--      ГЛАВНАЯ ПАНЕЛЬ    -->
-<!-- ---------------------- -->
 <div style="text-align:center; margin-top:5px; font-size:18px; color:var(--text);" class="glow">
     9 из 10 находят интересного собеседника за 5 секунд
 </div>
@@ -282,16 +331,13 @@ body {
     <button id="findBtn">НАЙТИ СОБЕСЕДНИКА</button>
     <div id="spinner"></div>
     <button id="stopSearch">ПРЕКРАТИТЬ ПОИСК</button>
+
     <button id="shareBtn">Поделиться сайтом</button>
 </div>
 
-
-<!-- ---------------------- -->
-<!--          ЧАТ           -->
-<!-- ---------------------- -->
+<!-- ЧАТ -->
 <div id="chat">
     <div id="partnerStatus" style="text-align:center;color:#00ff91;margin-bottom:8px;"></div>
-
     <div id="messages"></div>
     <div id="typing"></div>
 
@@ -303,25 +349,13 @@ body {
     <button id="endBtn">Завершить чат</button>
 </div>
 
-<!-- реакции -->
-<div id="reactionMenu" class="reaction-menu" style="display:none;">
-    <div class="reaction">❤️</div>
-    <div class="reaction">😂</div>
-    <div class="reaction">👍</div>
-    <div class="reaction">💩</div>
-    <div class="reaction">❗</div>
-</div>
-
 
 <script>
-/* ---------------------------------------------------------------- */
-/* -------------------------   JAVASCRIPT   ------------------------ */
-/* ---------------------------------------------------------------- */
 
 let socket = io();
 let typingTimer;
 
-/* ---------------------- ФАКТ ДНЯ -------------------------- */
+/* -------- ФАКТ ДНЯ ---------- */
 
 const facts = [
 "В среднем человек открывается незнакомцу в 2 раза быстрее.",
@@ -329,212 +363,168 @@ const facts = [
 "Каждый пятый находит нового друга в анонимном чате.",
 "66% людей честнее с незнакомцами.",
 "Разговор улучшает настроение в 78% случаев.",
+"Молчание — тоже часть общения.",
 "Лучшие диалоги начинаются случайно.",
 "Самые искренние ответы — первые.",
 "Люди читают сообщения дольше, чем ты думаешь.",
 "Хороший собеседник — редкость.",
-"90% недооценивают свою интересность.",
-"Один диалог может изменить настроение.",
-"Самые тёплые разговоры — с незнакомцами.",
-"Люди честнее в анонимности."
+"Каждый день в чатах рождаются тысячи мини-историй.",
+"Анонимность делает людей честнее.",
+"Некоторые диалоги забываются, некоторые — нет.",
+"Твой собеседник сейчас тоже чего-то ждёт.",
+"90% недооценивают, насколько они интересны.",
+"Каждый второй остаётся дольше, чем планировал.",
+"Один диалог может изменить настроение на весь день.",
+"Многие приходят «на минуту», а остаются на час.",
+"Самые тёплые разговоры — с теми, кого не знаешь.",
+"Люди чаще делятся мечтами с незнакомцами."
 ];
 
 window.onload = () => {
-    let box = factBox;
-    factText.textContent = facts[Math.floor(Math.random()*facts.length)];
-    box.style.display = "block";
-    setTimeout(()=> box.classList.add("show"), 20);
-    factClose.onclick = () =>{
-        box.classList.remove("show");
-        setTimeout(()=> box.style.display="none",250);
-    };
+    let box = document.getElementById("factBox");
+    let text = document.getElementById("factText");
+    text.textContent = facts[Math.floor(Math.random() * facts.length)];
 
-    updateRatingBox();
+    box.style.display = "block";
+    setTimeout(() => box.classList.add("show"), 20);
+
+    document.getElementById("factClose").onclick = () => {
+        box.classList.remove("show");
+        setTimeout(() => box.style.display = "none", 250);
+    };
 };
 
-
-/* ------------------- РЕЙТИНГ --------------------- */
-
-function getStatus(n){
-    if(n>=50) return "Популярный собеседник 👑";
-    if(n>=25) return "Опытный собеседник";
-    if(n>=10) return "Хороший собеседник";
-    return "Новый собеседник";
-}
-
-function updateRatingBox(){
-    const count = +localStorage.getItem("chatCount") || 0;
-    ratingYou.textContent = "Ваш уровень: " + getStatus(count) + " — ("+count+" чатов)";
-}
-
-
-/* ------------------- ТЕМЫ ------------------------ */
-
+/* -------- ТЕМА -------- */
 themeBtn.onclick = () => {
     document.body.classList.toggle("light");
     themeBtn.textContent =
-        document.body.classList.contains("light")?
-        "Светлая тема":"Тёмная тема";
+        document.body.classList.contains("light")
+        ? "Светлая тема"
+        : "Тёмная тема";
 };
 
+/* Поделиться сайтом */
+shareBtn.onclick = () => {
+    const url = "https://ruslan-chat2.onrender.com/";
+    if (navigator.share) navigator.share({ title: "Ruslan Chat", url });
+    else {
+        navigator.clipboard.writeText(url);
+        alert("Ссылка скопирована!");
+    }
+};
 
-/* ------------------- Поиск собеседника ---------------- */
+socket.on("online_count", n => online.textContent = n);
 
-findBtn.onclick = ()=>{
-    spinner.style.display="block";
-    stopSearch.style.display="block";
-    findBtn.style.display="none";
+/* Поиск собеседника */
+findBtn.onclick = () => {
+    spinner.style.display = "block";
+    stopSearch.style.display = "block";
+    findBtn.style.display = "none";
 
-    socket.emit("find",{
+    const chatCount = +localStorage.getItem("chatCount") || 0;
+
+    socket.emit("find", {
         gender: gender.value,
         searchfor: searchfor.value,
-        chatCount: +localStorage.getItem("chatCount") || 0
+        chatCount: chatCount
     });
 };
 
-stopSearch.onclick = ()=>{
-    spinner.style.display="none";
-    stopSearch.style.display="none";
-    findBtn.style.display="block";
+/* Прекратить поиск */
+stopSearch.onclick = () => {
+    spinner.style.display = "none";
+    stopSearch.style.display = "none";
+    findBtn.style.display = "block";
 
     socket.emit("cancel_search");
 };
 
+/* Начало чата */
+socket.on("chat_start", data => {
+    panel.style.display = "none";
+    chat.style.display = "block";
 
-/* ------------------- ЧАТ ------------------------- */
+    messages.innerHTML = "";
+    typing.innerHTML = "";
 
-socket.on("chat_start", data =>{
-    panel.style.display="none";
-    chat.style.display="block";
-    messages.innerHTML="";
-    typing.innerHTML="";
-
+    const partnerCount = data?.partnerChatCount || 0;
     partnerStatus.textContent =
-        "Собеседник: "+ (getStatus(data.partnerChatCount)||"Новый");
+        "Собеседник: " + (getStatus(partnerCount) || "Новый собеседник");
 
-    endBtn.style.display="block";
+    endBtn.style.display = "block";
 });
 
-
-/* ------------------- Отправка -------------------- */
-
+/* Отправка сообщений */
 sendBtn.onclick = sendMsg;
-
-msgInput.onkeydown = e=>{
-    if(e.key==="Enter") sendMsg();
+msgInput.onkeydown = e => {
+    if (e.key === "Enter") sendMsg();
     socket.emit("typing");
 };
 
-function sendMsg(){
+function sendMsg() {
     let text = msgInput.value.trim();
-    if(!text) return;
-    append("Вы: "+text,"self");
-    socket.emit("msg",text);
-    msgInput.value="";
+    if (!text) return;
+    append("Вы: " + text);
+    socket.emit("msg", text);
+    msgInput.value = "";
 }
 
-socket.on("msg", t => append("Собеседник: "+t,"other"));
+socket.on("msg", txt => append("Собеседник: " + txt));
 
-
-function append(t,from){
-    let d=document.createElement("div");
-    d.className="msg";
-    d.dataset.from = from;
-    d.textContent=t;
-
-    let r=document.createElement("span");
-    r.className="msg-react";
-    r.textContent="";
-    d.appendChild(r);
-
-    d.onclick = (e)=> openReactionMenu(e,d);
-
+function append(t) {
+    let d = document.createElement("div");
+    d.className = "msg";
+    d.textContent = t;
     messages.appendChild(d);
-    messages.scrollTop=messages.scrollHeight;
+    messages.scrollTop = messages.scrollHeight;
 }
 
-
-/* ------------------- ПЕЧАТАЕТ -------------------- */
-
-socket.on("typing", ()=>{
-    typing.textContent="Собеседник печатает...";
+/* печатает */
+socket.on("typing", () => {
+    typing.textContent = "Собеседник печатает...";
     clearTimeout(typingTimer);
-    typingTimer = setTimeout(()=> typing.textContent="",1500);
+    typingTimer = setTimeout(() => typing.textContent = "", 1500);
 });
 
+/* Завершить чат */
+endBtn.onclick = () => socket.emit("end");
 
-/* ------------------- РЕАКЦИИ --------------------- */
+/* При завершении чата */
+socket.on("chat_end", () => {
+    chat.style.display = "none";
+    panel.style.display = "block";
 
-let reactionMenu = document.getElementById("reactionMenu");
-let selectedMsg=null;
+    spinner.style.display = "none";
+    stopSearch.style.display = "none";
+    findBtn.style.display = "block";
 
-function openReactionMenu(e,msg){
-    if(msg.dataset.from==="self") return;
+    messages.innerHTML = "";
 
-    selectedMsg=msg;
-
-    reactionMenu.style.left=(e.pageX+10)+"px";
-    reactionMenu.style.top=(e.pageY+10)+"px";
-    reactionMenu.style.display="flex";
-}
-
-document.querySelectorAll(".reaction").forEach(r=>{
-    r.onclick = ev=>{
-        ev.stopPropagation();
-        if(!selectedMsg) return;
-
-        const emoji=r.textContent;
-
-        selectedMsg.querySelector(".msg-react").textContent = emoji;
-
-        const index = Array.from(messages.children).indexOf(selectedMsg);
-        socket.emit("reaction",{emoji,index});
-
-        reactionMenu.style.display="none";
-    };
-});
-
-socket.on("reaction",data=>{
-    if(!data) return;
-    let m = messages.children[data.index];
-    if(m) m.querySelector(".msg-react").textContent = data.emoji;
-});
-
-document.body.onclick = e=>{
-    if(!reactionMenu.contains(e.target))
-        reactionMenu.style.display="none";
-};
-
-
-/* ------------------- ЗАВЕРШИТЬ ЧАТ ---------------- */
-
-endBtn.onclick = ()=> socket.emit("end");
-
-socket.on("chat_end", ()=>{
-    chat.style.display="none";
-    panel.style.display="block";
-    spinner.style.display="none";
-    stopSearch.style.display="none";
-    findBtn.style.display="block";
-
-    messages.innerHTML="";
-    partnerStatus.textContent="";
-
-    let count = +localStorage.getItem("chatCount")||0;
-    count++;
-    localStorage.setItem("chatCount",count);
+    let count = +localStorage.getItem("chatCount") || 0;
+    localStorage.setItem("chatCount", ++count);
 
     updateRatingBox();
 });
 
+/* ------- РЕЙТИНГ ------- */
 
-/* ------------------- ОНЛАЙН ---------------------- */
+function getStatus(n){
+  if (n >= 50) return "Популярный собеседник 👑";
+  if (n >= 25) return "Опытный собеседник";
+  if (n >= 10) return "Хороший собеседник";
+  return "Новый собеседник";
+}
 
-socket.on("online_count", n => online.textContent=n);
+function updateRatingBox(){
+  const count = +localStorage.getItem("chatCount") || 0;
+  const status = getStatus(count);
+  document.getElementById("ratingYou").textContent =
+    `Ваш уровень: ${status} — (${count} чатов)`;
+}
+
+updateRatingBox();
 
 </script>
-</body>
-</html>
 
 </body>
 </html>
