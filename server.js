@@ -1,113 +1,126 @@
-// server.js
 const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
-const io = require("socket.io")(http, { cors: { origin: "*" } });
+const io = require("socket.io")(http, {
+    cors: { origin: "*" }
+});
 
-app.use(express.static("public")); // положи index.html в public/
+app.use(express.static(__dirname + "/public"));
 
-let queue = [];
-let partners = {};
-let online = 0;
+let queue = [];            // очередь на поиск
+let pairs = {};            // socket.id -> partnerId
+let userData = {};         // данные пользователей (пол + статус)
 
+
+// ----------- ПОЛЬЗОВАТЕЛЬ ПОДКЛЮЧЕН -------------
 io.on("connection", socket => {
-    online++;
-    io.emit("online_count", online);
 
-    // клиенты отправляют prefs: { gender, searchfor, chatCount }
-    socket.on("find", (prefs) => {
-        socket.prefs = prefs || {};
+    // обновить количество онлайн
+    io.emit("online_count", io.engine.clientsCount);
 
-        // если уже в паре — игнор
-        if (partners[socket.id]) return;
 
-        // простая очередь FIFO — берем первого в очереди
-        if (queue.length > 0) {
-            const partnerId = queue.shift();
+    // ---------- Поиск собеседника ----------
+    socket.on("find", data => {
+        userData[socket.id] = {
+            gender: data.gender,
+            searchfor: data.searchfor,
+            chatCount: data.chatCount || 0
+        };
 
-            // защита: не матчиться с самим собой (на всякий)
-            if (partnerId === socket.id) {
-                // если вдруг попали сами — попробуем следующего
-                if (queue.length > 0) {
-                    const next = queue.shift();
-                    if (next) {
-                        partners[socket.id] = next;
-                        partners[next] = socket.id;
-
-                        // отправляем каждому chat_start и partner's chatCount
-                        const partnerPrefs = io.sockets.sockets.get(next).prefs || {};
-                        const myPrefs = socket.prefs || {};
-
-                        io.to(socket.id).emit("chat_start", { partnerChatCount: partnerPrefs.chatCount || 0 });
-                        io.to(next).emit("chat_start", { partnerChatCount: myPrefs.chatCount || 0 });
-                    } else {
-                        queue.push(socket.id);
-                    }
-                } else {
-                    queue.push(socket.id);
-                }
-            } else {
-                partners[socket.id] = partnerId;
-                partners[partnerId] = socket.id;
-
-                const partnerPrefs = io.sockets.sockets.get(partnerId).prefs || {};
-                const myPrefs = socket.prefs || {};
-
-                io.to(socket.id).emit("chat_start", { partnerChatCount: partnerPrefs.chatCount || 0 });
-                io.to(partnerId).emit("chat_start", { partnerChatCount: myPrefs.chatCount || 0 });
-            }
-        } else {
-            // добавить в очередь
+        // если очередь пуста — добавляем
+        if (queue.length === 0) {
             queue.push(socket.id);
-            io.to(socket.id).emit("searching");
+            return;
         }
+
+        // иначе пробуем найти пару
+        let partnerId = queue.shift();
+
+        if (!partnerId || partnerId === socket.id) return;
+
+        // связываем
+        pairs[socket.id] = partnerId;
+        pairs[partnerId] = socket.id;
+
+        let myData = userData[socket.id];
+        let partnerData = userData[partnerId];
+
+        // отправляем обоим "начало чата"
+        io.to(socket.id).emit("chat_start", {
+            partnerChatCount: partnerData.chatCount
+        });
+
+        io.to(partnerId).emit("chat_start", {
+            partnerChatCount: myData.chatCount
+        });
     });
 
+
+    // ---------- Отмена поиска ----------
     socket.on("cancel_search", () => {
         queue = queue.filter(id => id !== socket.id);
     });
 
-    socket.on("msg", text => {
-        const p = partners[socket.id];
-        if (p) io.to(p).emit("msg", text);
+
+    // ---------- Сообщения ----------
+    socket.on("msg", txt => {
+        let partner = pairs[socket.id];
+        if (partner) io.to(partner).emit("msg", txt);
     });
 
-    // реакции: просто пересылаем партнёру
-    socket.on("reaction", data => {
-        const p = partners[socket.id];
-        if (p) io.to(p).emit("reaction", data);
-    });
 
+    // ---------- Тайпинг ----------
     socket.on("typing", () => {
-        const p = partners[socket.id];
-        if (p) io.to(p).emit("typing");
+        let partner = pairs[socket.id];
+        if (partner) io.to(partner).emit("typing");
     });
 
-    // завершение чата
+
+    // ---------- Реакции ----------
+    socket.on("reaction", data => {
+        let partner = pairs[socket.id];
+        if (partner) io.to(partner).emit("reaction", data);
+    });
+
+
+    // ---------- Завершение чата ----------
     socket.on("end", () => {
-        const p = partners[socket.id];
-        if (p) {
-            io.to(p).emit("chat_end");
-            delete partners[p];
+        let partner = pairs[socket.id];
+
+        if (partner) {
+            io.to(partner).emit("chat_end");
         }
-        delete partners[socket.id];
+
+        io.to(socket.id).emit("chat_end");
+
+        delete pairs[partner];
+        delete pairs[socket.id];
     });
 
+
+    // ---------- Отключение ----------
     socket.on("disconnect", () => {
-        online--;
-        io.emit("online_count", online);
-
-        const p = partners[socket.id];
-        if (p) {
-            io.to(p).emit("chat_end");
-            delete partners[p];
-        }
-        delete partners[socket.id];
-
+        // убрать из очереди
         queue = queue.filter(id => id !== socket.id);
+
+        let partner = pairs[socket.id];
+        if (partner) {
+            io.to(partner).emit("chat_end");
+            delete pairs[partner];
+        }
+
+        delete pairs[socket.id];
+        delete userData[socket.id];
+
+        io.emit("online_count", io.engine.clientsCount);
     });
 });
 
-http.listen(process.env.PORT || 3000, () => {
-    console.log("Server started on port", process.env.PORT || 3000);
+
+const PORT = process.env.PORT || 8080;
+http.listen(PORT, () => {
+    console.log("======================================");
+    console.log("🚀 Сервер запущен на порту:", PORT);
+    console.log("🌍 Локальный адрес: http://localhost:" + PORT);
+    console.log("======================================");
 });
