@@ -9,7 +9,6 @@
 <meta name="description" content="Ruslan Chat — анонимный чат для общения с незнакомцами. Быстрый поиск собеседника, неоновый дизайн, полностью бесплатный. Общайся без регистрации.">
 <meta name="keywords" content="анонимный чат, чат рандом, чат рулетка, ruslan chat, знакомство, случайный собеседник">
 <meta name="author" content="Ruslan">
-
 <meta property="og:title" content="Ruslan Chat — Анонимный чат">
 <meta property="og:description" content="Находи собеседников за 5 секунд. Полная анонимность. Без регистрации.">
 <meta property="og:type" content="website">
@@ -77,52 +76,6 @@ body {
     border-radius: 10px;
     cursor: pointer;
     box-shadow: 0 0 18px var(--logo-bg);
-}
-
-/* РЕЙТИНГ — новый блок */
-#ratingBox {
-  width: 70%;
-  margin: 6px auto 10px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  background: rgba(0,255,145,0.03);
-  border: 1px solid rgba(0,255,145,0.12);
-  color: #bfffe6;
-  text-align: center;
-  box-shadow: 0 0 12px rgba(0,255,145,0.06);
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-#ratingBox .title {
-  color: #00ff91;
-  font-weight: 700;
-  margin-bottom: 6px;
-  text-shadow: 0 0 8px #00ff91;
-}
-
-#ratingBox .levels {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 8px;
-  flex-wrap: wrap;
-}
-
-#ratingBox .level {
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: rgba(0,0,0,0.16);
-  border: 1px solid rgba(0,255,145,0.06);
-  font-weight: 600;
-  color: #e6fff5;
-  font-size: 13px;
-}
-
-#ratingBox .you {
-  margin-top: 8px;
-  color: #00ff91;
-  font-weight: 700;
 }
 
 /* ГЛАВНАЯ ПАНЕЛЬ */
@@ -227,9 +180,17 @@ select {
 }
 
 #typing {
-    height: 20px;
-    color: #999;
+    height: 22px;
+    font-size: 15px;
+    color: #00ff91;
 }
+
+/* typing animation (dots) */
+.typing-dots { display:inline-block; vertical-align:middle; }
+.typing-dots span { display:inline-block; width:6px; height:6px; background:#00ff91; border-radius:50%; margin:0 3px; opacity:.25; animation:blink 1s infinite; }
+.typing-dots span:nth-child(2){ animation-delay:.15s; }
+.typing-dots span:nth-child(3){ animation-delay:.3s; }
+@keyframes blink { 0%{opacity:.2} 50%{opacity:1} 100%{opacity:.2} }
 
 #sendPanel {
     display: flex;
@@ -265,6 +226,52 @@ select {
     display: none;
 }
 
+/* РЕАКЦИИ */
+.reaction-menu {
+    position: absolute;
+    background: rgba(0,255,80,0.15);
+    border: 1px solid #00ff91;
+    padding: 6px 8px;
+    border-radius: 10px;
+    display: flex;
+    gap: 6px;
+    box-shadow: 0 0 12px #00ff91;
+    z-index: 9999;
+    user-select: none;
+}
+
+.reaction {
+    cursor: pointer;
+    font-size: 20px;
+}
+.reaction:hover { transform: scale(1.2); }
+
+.msg-react {
+    font-size: 18px;
+    margin-left: 8px;
+    opacity: .95;
+}
+
+/* Рейтинг (перемещён вниз) */
+#ratingBox {
+  width: 70%;
+  margin: 12px auto 30px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(0,255,145,0.03);
+  border: 1px solid rgba(0,255,145,0.12);
+  color: #bfffe6;
+  text-align: center;
+  box-shadow: 0 0 12px rgba(0,255,145,0.06);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+#ratingBox .title { color:#00ff91; font-weight:700; margin-bottom:6px; text-shadow:0 0 8px #00ff91; }
+#ratingBox .levels{ display:flex; justify-content:center; gap:12px; margin-top:8px; flex-wrap:wrap; }
+#ratingBox .level{ padding:6px 10px; border-radius:8px; background:rgba(0,0,0,0.16); border:1px solid rgba(0,255,145,0.06); font-weight:600; color:#e6fff5; font-size:13px; }
+#ratingBox .you{ margin-top:8px; color:#00ff91; font-weight:700; }
+
 </style>
 
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
@@ -272,7 +279,7 @@ select {
 
 <body>
 
-<!-- ФАКТ ДНЯ -->
+<!-- Факт дня (оставлен вверху) -->
 <div id="factBox" style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.8);width:300px;padding:18px;background:rgba(0,0,0,0.92);border-radius:14px;border:2px solid #00ff91;box-shadow:0 0 20px #00ff91;opacity:0;transition:.25s ease;z-index:9999;color:#fff;display:none;">
     <div id="factClose" style="position:absolute;right:12px;top:6px;cursor:pointer;font-size:18px;color:#00ff91;">✖</div>
     <h3 style="text-align:center;margin-top:5px;color:#00ff91;" class="glow">Факт дня</h3>
@@ -288,29 +295,11 @@ select {
     <button id="themeBtn">Тёмная тема</button>
 </div>
 
-<!-- РЕЙТИНГ -->
-<div id="ratingBox">
-  <div class="title">⭐ Как работает рейтинг собеседника?</div>
-
-  <div class="desc">
-    Каждый завершённый чат повышает ваш уровень.  
-    Ваш статус видят другие при подключении.
-  </div>
-
-  <div class="levels">
-    <div class="level">🟢 Новый — 0+</div>
-    <div class="level">🔵 Хороший — 10+</div>
-    <div class="level">🟣 Опытный — 25+</div>
-    <div class="level">👑 Популярный — 50+</div>
-  </div>
-
-  <div id="ratingYou" class="you">Ваш уровень: —</div>
-</div>
-
 <div style="text-align:center; margin-top:5px; font-size:18px; color:var(--text);" class="glow">
     9 из 10 находят интересного собеседника за 5 секунд
 </div>
 
+<!-- Главное меню -->
 <div id="panel">
 
     <div style="font-size:18px;">Онлайн: <span id="online">0</span></div><br>
@@ -349,14 +338,41 @@ select {
     <button id="endBtn">Завершить чат</button>
 </div>
 
+<!-- меню реакций (скрыто) -->
+<div id="reactionMenu" class="reaction-menu" style="display:none;">
+    <div class="reaction">❤️</div>
+    <div class="reaction">😂</div>
+    <div class="reaction">👍</div>
+    <div class="reaction">💩</div>
+    <div class="reaction">❗</div>
+</div>
+
+<!-- Рейтинг внизу: виден только в главном меню -->
+<div id="ratingBox">
+  <div class="title">⭐ Как работает рейтинг собеседника?</div>
+
+  <div class="desc">
+    Каждый завершённый чат повышает ваш уровень.  
+    Ваш статус видят другие при подключении.
+  </div>
+
+  <div class="levels">
+    <div class="level">🟢 Новичок — 0–49</div>
+    <div class="level">🔵 Хороший — 50–299</div>
+    <div class="level">🟣 Опытный — 300–699</div>
+    <div class="level">👑 Популярный — 700–1199</div>
+    <div class="level">👑👑 КОРОЛЬ — 1200+</div>
+  </div>
+
+  <div id="ratingYou" class="you">Ваш уровень: —</div>
+</div>
 
 <script>
-
+/* ========== Client script ========== */
 let socket = io();
-let typingTimer;
+let typingTimer = null;
 
-/* -------- ФАКТ ДНЯ ---------- */
-
+/* --- Факт дня --- */
 const facts = [
 "В среднем человек открывается незнакомцу в 2 раза быстрее.",
 "Первые 10 секунд решают, продолжится ли разговор.",
@@ -374,155 +390,245 @@ const facts = [
 "Твой собеседник сейчас тоже чего-то ждёт.",
 "90% недооценивают, насколько они интересны.",
 "Каждый второй остаётся дольше, чем планировал.",
-"Один диалог может изменить настроение на весь день.",
+"Один диалог может изменить настроение на весь дня.",
 "Многие приходят «на минуту», а остаются на час.",
 "Самые тёплые разговоры — с теми, кого не знаешь.",
 "Люди чаще делятся мечтами с незнакомцами."
 ];
 
-window.onload = () => {
-    let box = document.getElementById("factBox");
-    let text = document.getElementById("factText");
+window.addEventListener('load', () => {
+    // факт дня
+    const box = document.getElementById('factBox');
+    const text = document.getElementById('factText');
     text.textContent = facts[Math.floor(Math.random() * facts.length)];
-
-    box.style.display = "block";
-    setTimeout(() => box.classList.add("show"), 20);
-
-    document.getElementById("factClose").onclick = () => {
-        box.classList.remove("show");
-        setTimeout(() => box.style.display = "none", 250);
+    box.style.display = 'block';
+    setTimeout(()=> box.classList.add('show'), 20);
+    document.getElementById('factClose').onclick = () => {
+        box.classList.remove('show');
+        setTimeout(()=> box.style.display='none',250);
     };
-};
 
-/* -------- ТЕМА -------- */
-themeBtn.onclick = () => {
-    document.body.classList.toggle("light");
-    themeBtn.textContent =
-        document.body.classList.contains("light")
-        ? "Светлая тема"
-        : "Тёмная тема";
-};
-
-/* Поделиться сайтом */
-shareBtn.onclick = () => {
-    const url = "https://ruslan-chat2.onrender.com/";
-    if (navigator.share) navigator.share({ title: "Ruslan Chat", url });
-    else {
-        navigator.clipboard.writeText(url);
-        alert("Ссылка скопирована!");
-    }
-};
-
-socket.on("online_count", n => online.textContent = n);
-
-/* Поиск собеседника */
-findBtn.onclick = () => {
-    spinner.style.display = "block";
-    stopSearch.style.display = "block";
-    findBtn.style.display = "none";
-
-    const chatCount = +localStorage.getItem("chatCount") || 0;
-
-    socket.emit("find", {
-        gender: gender.value,
-        searchfor: searchfor.value,
-        chatCount: chatCount
-    });
-};
-
-/* Прекратить поиск */
-stopSearch.onclick = () => {
-    spinner.style.display = "none";
-    stopSearch.style.display = "none";
-    findBtn.style.display = "block";
-
-    socket.emit("cancel_search");
-};
-
-/* Начало чата */
-socket.on("chat_start", data => {
-    panel.style.display = "none";
-    chat.style.display = "block";
-
-    messages.innerHTML = "";
-    typing.innerHTML = "";
-
-    const partnerCount = data?.partnerChatCount || 0;
-    partnerStatus.textContent =
-        "Собеседник: " + (getStatus(partnerCount) || "Новый собеседник");
-
-    endBtn.style.display = "block";
+    // рейтинг: обновить и показать (в главном меню)
+    updateRatingBox();
+    showRatingBox(); // виден при загрузке (в меню)
 });
 
-/* Отправка сообщений */
-sendBtn.onclick = sendMsg;
-msgInput.onkeydown = e => {
-    if (e.key === "Enter") sendMsg();
-    socket.emit("typing");
+/* ---------- тема и шаринг ---------- */
+document.getElementById('themeBtn').onclick = () => {
+    document.body.classList.toggle('light');
+    document.getElementById('themeBtn').textContent = document.body.classList.contains('light') ? 'Светлая тема' : 'Тёмная тема';
+};
+document.getElementById('shareBtn').onclick = () => {
+    const url = location.href;
+    if (navigator.share) navigator.share({ title: 'Ruslan Chat', url });
+    else { navigator.clipboard.writeText(url); alert('Ссылка скопирована!'); }
 };
 
-function sendMsg() {
-    let text = msgInput.value.trim();
-    if (!text) return;
-    append("Вы: " + text);
-    socket.emit("msg", text);
-    msgInput.value = "";
+/* ---------- онлайн ---------- */
+socket.on('online_count', n => document.getElementById('online').textContent = n);
+
+/* ---------- Поиск ---------- */
+document.getElementById('findBtn').onclick = () => {
+    document.getElementById('spinner').style.display = 'block';
+    document.getElementById('stopSearch').style.display = 'block';
+    document.getElementById('findBtn').style.display = 'none';
+
+    const chatCount = +localStorage.getItem('chatCount') || 0;
+    socket.emit('find', { gender: document.getElementById('gender').value, searchfor: document.getElementById('searchfor').value, chatCount });
+};
+
+document.getElementById('stopSearch').onclick = () => {
+    document.getElementById('spinner').style.display = 'none';
+    document.getElementById('stopSearch').style.display = 'none';
+    document.getElementById('findBtn').style.display = 'block';
+    socket.emit('cancel_search');
+};
+
+/* ---------- Чат старт ---------- */
+socket.on('chat_start', (data) => {
+    // скрываем рейтинг и панель поиска
+    hideRatingBox();
+
+    document.getElementById('panel').style.display = 'none';
+    document.getElementById('chat').style.display = 'block';
+    document.getElementById('messages').innerHTML = '';
+    document.getElementById('typing').innerHTML = '';
+
+    const partnerCount = data?.partnerChatCount || 0;
+    document.getElementById('partnerStatus').textContent = 'Собеседник: ' + (getStatus(partnerCount) || 'Новый собеседник');
+
+    document.getElementById('spinner').style.display = 'none';
+    document.getElementById('stopSearch').style.display = 'none';
+    document.getElementById('findBtn').style.display = 'none';
+    document.getElementById('endBtn').style.display = 'block';
+});
+
+/* ---------- Сообщения ---------- */
+document.getElementById('sendBtn').onclick = sendMsg;
+document.getElementById('msgInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendMsg();
+    socket.emit('typing');
+});
+
+function sendMsg(){
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    if(!text) return;
+    appendMsg('Вы: ' + text, 'self');
+    socket.emit('msg', text);
+    input.value = '';
 }
 
-socket.on("msg", txt => append("Собеседник: " + txt));
+socket.on('msg', txt => appendMsg('Собеседник: ' + txt, 'other'));
 
-function append(t) {
-    let d = document.createElement("div");
-    d.className = "msg";
-    d.textContent = t;
+/* append message (adds reaction span + data-from) */
+function appendMsg(text, from='self'){
+    const messages = document.getElementById('messages');
+    const d = document.createElement('div');
+    d.className = 'msg';
+    d.dataset.from = from;
+    d.textContent = text;
+
+    // reaction span
+    const r = document.createElement('span');
+    r.className = 'msg-react';
+    r.textContent = '';
+    d.appendChild(r);
+
+    // attach click only for other messages
+    d.addEventListener('click', e => openReactionMenu(e, d));
+
     messages.appendChild(d);
     messages.scrollTop = messages.scrollHeight;
 }
 
-/* печатает */
-socket.on("typing", () => {
-    typing.textContent = "Собеседник печатает...";
+/* ---------- typing animation ---------- */
+socket.on('typing', () => {
+    const typing = document.getElementById('typing');
+    typing.innerHTML = '<span class="typing-dots"><span></span><span></span><span></span></span>';
     clearTimeout(typingTimer);
-    typingTimer = setTimeout(() => typing.textContent = "", 1500);
+    typingTimer = setTimeout(()=> typing.innerHTML = '', 1600);
 });
 
-/* Завершить чат */
-endBtn.onclick = () => socket.emit("end");
+/* ---------- Реакции (меню) ---------- */
+const reactionMenu = document.getElementById('reactionMenu');
+let selectedMsg = null;
 
-/* При завершении чата */
-socket.on("chat_end", () => {
-    chat.style.display = "none";
-    panel.style.display = "block";
+// open menu near cursor
+function openReactionMenu(e, msg){
+    // only for messages from partner
+    if (!msg || msg.dataset.from === 'self') return;
+    e.stopPropagation();
+    selectedMsg = msg;
 
-    spinner.style.display = "none";
-    stopSearch.style.display = "none";
-    findBtn.style.display = "block";
+    // position with bounds check
+    const offset = 8;
+    let x = e.pageX + offset;
+    let y = e.pageY + offset;
 
-    messages.innerHTML = "";
+    // fit inside viewport horizontally
+    const menuRect = reactionMenu.getBoundingClientRect();
+    if (x + 160 > window.innerWidth) x = window.innerWidth - 170;
+    reactionMenu.style.left = x + 'px';
+    reactionMenu.style.top = y + 'px';
+    reactionMenu.style.display = 'flex';
+}
 
-    let count = +localStorage.getItem("chatCount") || 0;
-    localStorage.setItem("chatCount", ++count);
+// select reaction (one per message)
+document.querySelectorAll('.reaction').forEach(node => {
+    node.addEventListener('click', ev => {
+        ev.stopPropagation();
+        if (!selectedMsg) return;
+        const emoji = node.textContent;
 
+        // set in DOM (replace previous)
+        selectedMsg.querySelector('.msg-react').textContent = emoji;
+
+        // send to partner (by index)
+        const messages = document.getElementById('messages');
+        const index = Array.from(messages.children).indexOf(selectedMsg);
+        socket.emit('reaction', { emoji, index });
+
+        reactionMenu.style.display = 'none';
+    });
+});
+
+// receive reaction from partner
+socket.on('reaction', data => {
+    if (!data) return;
+    const messages = document.getElementById('messages');
+    const msg = messages.children[data.index];
+    if (msg) msg.querySelector('.msg-react').textContent = data.emoji;
+});
+
+// hide menu when clicking outside (but allow clicks on messages to open it)
+document.addEventListener('click', (e) => {
+    if (!reactionMenu.contains(e.target)) reactionMenu.style.display = 'none';
+});
+
+/* ---------- Завершение чата ---------- */
+document.getElementById('endBtn').onclick = () => socket.emit('end');
+
+socket.on('chat_end', () => {
+    // return both sides to main menu
+    document.getElementById('chat').style.display = 'none';
+    document.getElementById('panel').style.display = 'block';
+
+    document.getElementById('spinner').style.display = 'none';
+    document.getElementById('stopSearch').style.display = 'none';
+    document.getElementById('findBtn').style.display = 'block';
+
+    document.getElementById('messages').innerHTML = '';
+    document.getElementById('partnerStatus').textContent = '';
+
+    // show rating box back in main menu
+    showRatingBox();
+
+    // increment local chatCount and update rating
+    let count = +localStorage.getItem('chatCount') || 0;
+    count++;
+    localStorage.setItem('chatCount', count);
     updateRatingBox();
 });
 
-/* ------- РЕЙТИНГ ------- */
-
+/* ---------- Rating helpers ---------- */
+// thresholds per твоей правке:
+// 0–49 Новичок
+// 50–299 Хороший
+// 300–699 Опытный
+// 700–1199 Популярный
+// 1200+ КОРОЛЬ
 function getStatus(n){
-  if (n >= 50) return "Популярный собеседник 👑";
-  if (n >= 25) return "Опытный собеседник";
-  if (n >= 10) return "Хороший собеседник";
-  return "Новый собеседник";
+    if (n >= 1200) return 'КОРОЛЬ';
+    if (n >= 700) return 'Популярный собеседник';
+    if (n >= 300) return 'Опытный собеседник';
+    if (n >= 50) return 'Хороший собеседник';
+    return 'Новичок';
 }
 
 function updateRatingBox(){
-  const count = +localStorage.getItem("chatCount") || 0;
-  const status = getStatus(count);
-  document.getElementById("ratingYou").textContent =
-    `Ваш уровень: ${status} — (${count} чатов)`;
+    const count = +localStorage.getItem('chatCount') || 0;
+    const status = getStatus(count);
+    const el = document.getElementById('ratingYou');
+    if (el) el.textContent = `Ваш уровень: ${status} — (${count} чатов)`;
 }
 
+// show/hide rating box
+function hideRatingBox(){
+    const box = document.getElementById('ratingBox');
+    if (box) box.style.display = 'none';
+}
+function showRatingBox(){
+    const box = document.getElementById('ratingBox');
+    if (box) box.style.display = 'block';
+}
+
+/* on load ensure rating visible */
 updateRatingBox();
+showRatingBox();
+
+/* ensure rating hides on manual search start too (UX) */
+document.getElementById('findBtn').addEventListener('click', () => hideRatingBox());
 
 </script>
 
