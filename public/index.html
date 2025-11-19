@@ -5,272 +5,76 @@
 <title>Ruslan Chat — анонимный чат</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
-
 <style>
 /* ТЕМЫ */
-:root {
-    --bg: #000;
-    --text: #0f0;
-    --panel-bg: rgba(0,255,50,0.06);
-    --msg-bg: #1d1f23;
-    --input-bg: #222;
-    --logo-bg: #00ff91;
-}
-.light {
-    --bg: #f2f2f2;
-    --text: #000;
-    --panel-bg: #fff;
-    --msg-bg: #e6e6e6;
-    --input-bg: #fff;
-    --logo-bg: #00c86d;
-}
-
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    transition: .3s;
-}
-
+:root { --bg: #000; --text: #0f0; --panel-bg: rgba(0,255,50,0.06); --msg-bg: #1d1f23; --input-bg: #222; --logo-bg: #00ff91; }
+.light { --bg: #f2f2f2; --text: #000; --panel-bg: #fff; --msg-bg: #e6e6e6; --input-bg: #fff; --logo-bg: #00c86d; }
+body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--text); transition: .3s; }
 /* НЕОН */
-.glow {
-    text-shadow: 0 0 10px #00ff91, 0 0 20px #00ff91, 0 0 40px #00ff91;
-}
-
+.glow { text-shadow: 0 0 10px #00ff91, 0 0 20px #00ff91, 0 0 40px #00ff91; }
 /* ШАПКА */
-#header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 25px;
-    font-size: 26px;
-    font-weight: bold;
-}
-#logo {
-    background: var(--logo-bg);
-    color: #000;
-    padding: 7px 14px;
-    border-radius: 12px;
-    font-weight: bold;
-    box-shadow: 0 0 20px var(--logo-bg);
-}
-
-#themeBtn {
-    padding: 10px 15px;
-    background: var(--logo-bg);
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    box-shadow: 0 0 18px var(--logo-bg);
-}
-
+#header { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; font-size: 26px; font-weight: bold; }
+#logo { background: var(--logo-bg); color: #000; padding: 7px 14px; border-radius: 12px; font-weight: bold; box-shadow: 0 0 20px var(--logo-bg); }
+#themeBtn { padding: 10px 15px; background: var(--logo-bg); border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 0 18px var(--logo-bg); }
 /* ГЛАВНАЯ ПАНЕЛЬ */
-#panel {
-    width: 70%;
-    margin: 20px auto;
-    padding: 25px;
-    border-radius: 20px;
-    background: var(--panel-bg);
-    box-shadow: 0 0 25px #00ff91;
-}
-
+#panel { width: 70%; margin: 20px auto; padding: 25px; border-radius: 20px; background: var(--panel-bg); box-shadow: 0 0 25px #00ff91; }
 label { margin-bottom: 5px; font-size: 18px; display: block; }
-
-select {
-    width: 180px;
-    padding: 10px;
-    border-radius: 8px;
-    border: none;
-}
-
+select { width: 180px; padding: 10px; border-radius: 8px; border: none; }
 /* КНОПКИ */
-#findBtn, #shareBtn {
-    width: 100%;
-    padding: 18px;
-    margin-top: 20px;
-    font-size: 18px;
-    font-weight: bold;
-    background: #00ff66;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 0 20px #00ff91;
-}
-
+#findBtn, #shareBtn { width: 100%; padding: 18px; margin-top: 20px; font-size: 18px; font-weight: bold; background: #00ff66; border-radius: 12px; border: none; cursor: pointer; box-shadow: 0 0 20px #00ff91; }
 #findBtn:hover, #shareBtn:hover { transform: scale(1.03); }
-
-#stopSearch {
-    display: none;
-    width: 100%;
-    padding: 14px;
-    background: #ff3b3b;
-    border-radius: 10px;
-    border: none;
-    color: white;
-    margin-top: 15px;
-}
-
+#stopSearch { display: none; width: 100%; padding: 14px; background: #ff3b3b; border-radius: 10px; border: none; color: white; margin-top: 15px; }
 /* СПИННЕР */
-#spinner {
-    display: none;
-    margin: 15px auto;
-    width: 50px;
-    height: 50px;
-    border: 6px solid #333;
-    border-top: 6px solid #00ff91;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    100% { transform: rotate(360deg); }
-}
-
+#spinner { display: none; margin: 15px auto; width: 50px; height: 50px; border: 6px solid #333; border-top: 6px solid #00ff91; border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
 /* ЧАТ */
-#chat {
-    display: none;
-    width: 70%;
-    margin: 20px auto;
-}
-
-#messages {
-    background: #0d0f12;
-    height: 430px;
-    overflow-y: auto;
-    padding: 20px;
-    border-radius: 16px;
-    box-shadow: 0 0 25px #00ff91;
-}
-
-/* ВАЖНО: перенос */
-.msg {
-    background: var(--msg-bg);
-    color: var(--text);
-    padding: 12px 16px;
-    border-radius: 14px;
-    margin-bottom: 10px;
-    max-width: 100%;
-    animation: fade .25s ease;
-    position: relative;
-    word-wrap: break-word;
-    white-space: pre-wrap;
-    box-sizing: border-box;
-}
-
-@keyframes fade {
-    from {opacity: 0; transform: translateY(10px);}
-    to {opacity: 1;}
-}
-
-#typing {
-    height: 22px;
-    font-size: 15px;
-    color: #00ff91;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* typing dots */
+#chat { display: none; width: 70%; margin: 20px auto; position: relative; }
+#messages { background: #0d0f12; height: 430px; overflow-y: auto; padding: 20px; border-radius: 16px; box-shadow: 0 0 25px #00ff91; }
+/* ВАЖНО: перенос и перенос по словам */
+.msg { background: var(--msg-bg); color: var(--text); padding: 12px 16px; border-radius: 14px; margin-bottom: 10px; max-width: 100%; animation: fade .25s ease; position: relative; word-wrap: break-word; white-space: pre-wrap; box-sizing: border-box; }
+@keyframes fade { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; } }
+#typing { height: 22px; font-size: 15px; color: #00ff91; display: flex; align-items: center; gap: 8px; }
+/* typing dots (B2) */
 .typing-dots { display:inline-flex; gap:8px; align-items:center; }
-.dot { width:10px; height:10px; background:#00ff91; border-radius:50%; animation:dot-jump 1s infinite; }
-
-@keyframes dot-jump {
-  0%{ transform:translateY(0); opacity:.35 }
-  35%{ transform:translateY(-6px); opacity:1 }
-  70%{ transform:translateY(0); opacity:.6 }
-  100%{ transform:translateY(0); opacity:.35 }
-}
-
+.typing-dots .dot { width:10px; height:10px; background:#00ff91; border-radius:50%; display:inline-block; animation:dot-jump 1s infinite; opacity:.9; }
+.typing-dots .dot:nth-child(1){ animation-delay:0s }
+.typing-dots .dot:nth-child(2){ animation-delay:.12s }
+.typing-dots .dot:nth-child(3){ animation-delay:.24s }
+@keyframes dot-jump { 0%{ transform:translateY(0); opacity:.35 } 35%{ transform:translateY(-6px); opacity:1 } 70%{ transform:translateY(0); opacity:.6 } 100%{ transform:translateY(0); opacity:.35 } }
 /* send panel */
-#sendPanel {
-    display:flex;
-    margin-top:10px;
-    gap:10px;
-    align-items:center;
-}
-
-#msgInput {
-    flex:1;
-    padding:12px;
-    border-radius:12px;
-    border:none;
-    background:var(--input-bg);
-    color:var(--text);
-}
-
-#sendBtn {
-    padding:12px 25px;
-    background:#00ff91;
-    border-radius:10px;
-    border:none;
-    cursor:pointer;
-}
-
-/* 🎤 КНОПКА ГОЛОСОВЫХ */
-#voiceBtn {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    border: none;
-    background: #00ff91;
-    color: black;
-    font-size: 22px;
-    cursor: pointer;
-    box-shadow: 0 0 14px #00ff91;
-}
-
-#voiceBtn.recording {
-    background: #ff3b3b;
-    box-shadow: 0 0 20px #ff3b3b;
-}
-
-#endBtn {
-    margin-top:15px;
-    width:100%;
-    padding:14px;
-    background:#ff3b3b;
-    color:white;
-    border:none;
-    border-radius:10px;
-    display:none;
-}
-
-/* Реакции — фиксированное меню */
-.reaction-menu {
-    position: fixed;
-    bottom: 70px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,255,80,0.12);
-    border: 1px solid #00ff91;
-    padding: 8px 10px;
-    border-radius: 12px;
-    display: none;
-    gap: 8px;
-    box-shadow: 0 0 18px #00ff91;
-    z-index: 2000;
-}
-
-.reaction { cursor:pointer; font-size:22px; padding:6px; background:rgba(0,0,0,0.18); border-radius:8px; }
+#sendPanel { display:flex; margin-top:10px; gap:10px; align-items:center; }
+#msgInput { flex:1; padding:12px; border-radius:12px; border:none; background:var(--input-bg); color:var(--text); }
+#sendBtn { padding:12px 25px; background:#00ff91; border-radius:10px; border:none; cursor:pointer; }
+#endBtn { margin-top:15px; width:100%; padding:14px; background:#ff3b3b; color:white; border:none; border-radius:10px; display:none }
+/* voice button */
+#voiceBtn { padding:8px 10px; border-radius:10px; border:none; background:rgba(255,255,255,0.04); color:var(--text); cursor:pointer; font-size:18px; display:inline-flex; align-items:center; justify-content:center; min-width:44px; }
+#voiceBtn.recording { background: linear-gradient(90deg,#ff4d4d,#ff1a1a); color: #fff; box-shadow:0 0 12px rgba(255,40,40,0.6); transform:scale(1.03); }
+/* recording timer badge */
+.record-timer { margin-left:8px; font-size:13px; color:#fff; background:rgba(0,0,0,0.25); padding:2px 6px; border-radius:8px; }
+/* реакции - теперь фиксированное меню по центру, над панелью отправки */
+.reaction-menu { position: fixed; bottom: 55px; left: 50%; transform: translateX(-50%); background: rgba(0,255,80,0.12); border: 1px solid #00ff91; padding: 8px 10px; border-radius: 12px; display: none; gap: 8px; box-shadow: 0 0 18px #00ff91; z-index: 2000; }
+.reaction { cursor:pointer; font-size:22px; padding:6px; border-radius:8px; background: rgba(0,0,0,0.18); }
 .reaction:hover { transform: scale(1.15); }
-
-.msg-react {
-    font-size:18px;
-    margin-left:8px;
-    opacity:.95;
-    position:absolute;
-    right:10px;
-    top:10px;
-}
+.msg-react { font-size:18px; margin-left:8px; opacity:.95; position:absolute; right:10px; top:10px; }
+/* рейтинг */
+#ratingBox { width: 70%; margin: 12px auto 30px; padding: 10px 14px; border-radius: 12px; background: rgba(0,255,145,0.03); border: 1px solid rgba(0,255,145,0.12); color: #bfffe6; text-align: center; box-shadow: 0 0 12px rgba(0,255,145,0.06); font-size: 14px; line-height: 1.4; }
+#ratingBox .title { color:#00ff91; font-weight:700; margin-bottom:6px; text-shadow:0 0 8px #00ff91; }
+#ratingBox .levels{ display:flex; justify-content:center; gap:12px; margin-top:8px; flex-wrap:wrap; }
+#ratingBox .level{ padding:6px 10px; border-radius:8px; background:rgba(0,0,0,0.16); border:1px solid rgba(0,255,145,0.06); font-weight:600; color:#e6fff5; font-size:13px; }
+#ratingBox .you{ margin-top:8px; color:#00ff91; font-weight:700; }
+/* факт дня */
+#factBox { position: fixed; top:50%; left:50%; transform: translate(-50%,-50%) scale(.8); width:300px; padding:18px; background:rgba(0,0,0,0.92); border-radius:14px; border:2px solid #00ff91; box-shadow:0 0 20px #00ff91; opacity:0; transition:.25s ease; z-index:9999; color:#fff; display:none; }
+#factBox.show { opacity:1; transform:translate(-50%,-50%) scale(1); }
+#factClose { position:absolute; right:12px; top:6px; cursor:pointer; font-size:18px; color:#00ff91; }
+#factText { text-align:center; font-size:15px; min-height:40px; }
+/* responsive a little */
+@media(max-width:900px){ #panel, #chat, #ratingBox { width: 92%; } .reaction-menu { bottom: 140px; } #messages { height: 52vh; } }
 </style>
-
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 </head>
 <body>
 
-<!-- ФАКТ ДНЯ -->
+<!-- Факт дня -->
 <div id="factBox">
   <div id="factClose">✖</div>
   <h3 style="text-align:center;margin-top:5px;color:#00ff91;" class="glow">Факт дня</h3>
@@ -285,11 +89,11 @@ select {
   <button id="themeBtn">Тёмная тема</button>
 </div>
 
-<div style="text-align:center; margin-top:5px; font-size:18px;" class="glow">
+<div style="text-align:center; margin-top:5px; font-size:18px; color:var(--text);" class="glow">
   9 из 10 находят интересного собеседника за 5 секунд
 </div>
 
-<!-- ГЛАВНОЕ МЕНЮ -->
+<!-- Главное меню -->
 <div id="panel">
   <div style="font-size:18px;">Онлайн: <span id="online">0</span></div><br>
 
@@ -316,21 +120,21 @@ select {
 <!-- ЧАТ -->
 <div id="chat">
   <div id="partnerStatus" style="text-align:center;color:#00ff91;margin-bottom:8px;"></div>
-
   <div id="messages"></div>
   <div id="typing"></div>
 
   <div id="sendPanel">
-    <input id="msgInput" placeholder="Введите сообщение..." autocomplete="off"/>
-    <button id="voiceBtn">🎤</button>
+    <input id="msgInput" placeholder="Введите сообщение..." autocomplete="off" />
+    <!-- voice button (hold to record) -->
+    <button id="voiceBtn" title="Удерживайте для записи">🎤</button>
     <button id="sendBtn">Отправить</button>
   </div>
 
   <button id="endBtn">Завершить чат</button>
 </div>
 
-<!-- МЕНЮ РЕАКЦИЙ -->
-<div id="reactionMenu" class="reaction-menu">
+<!-- реакций меню (фиксированное, центр над sendPanel) -->
+<div id="reactionMenu" class="reaction-menu" aria-hidden="true">
   <div class="reaction">❤️</div>
   <div class="reaction">😂</div>
   <div class="reaction">👍</div>
@@ -341,13 +145,15 @@ select {
   <div class="reaction">😱</div>
 </div>
 
-<!-- РЕЙТИНГ -->
+<!-- Рейтинг -->
 <div id="ratingBox">
   <div class="title">⭐ Как работает рейтинг собеседника?</div>
+
   <div class="desc">
     Каждый завершённый чат повышает ваш уровень.  
     Ваш статус видят другие при подключении.
   </div>
+
   <div class="levels">
     <div class="level">🟢 Новичок — 0–49</div>
     <div class="level">🔵 Хороший — 50–299</div>
@@ -355,337 +161,369 @@ select {
     <div class="level">👑 Популярный — 700–1199</div>
     <div class="level">👑👑 КОРОЛЬ — 1200+</div>
   </div>
-  <div id="ratingYou" class="you"></div>
+
+  <div id="ratingYou" class="you">Ваш уровень: —</div>
 </div>
 
 <script>
-/* КЛИЕНТ */
+/* ========= client ========= */
 const socket = io();
+let typingTimer = null;
+let selectedMsg = null;
 
-/* ФАКТ ДНЯ */
+/* 50 фактов (сокращённо, можно расширить) */
 const facts = [
-  "В среднем человек открывается незнакомцу в 2 раза быстрее.",
-  "Каждый третий начинает разговор с человеком, которого никогда бы не выбрал в реальной жизни.",
-  "Самое короткое общение может стать самым запоминающимся.",
-  "Большинство людей боятся начинать беседу, но рады, когда это делает другой.",
-  "Честность в анонимном чате выше на 70%.",
-  "Один комплимент способен изменить весь диалог.",
-  "Случайный диалог может изменить настроение на весь день."
-  "Большинство людей открываются незнакомцам быстрее, чем друзьям.",
-  "Один тёплый ответ может изменить отношение к собеседнику моментально.",
-  "Анонимность делает людей честнее почти в два раза.",
-  "Иногда один вопрос раскрывает человека лучше долгой беседы.",
-  "Многие приходят в чат просто услышать «ты не один».",
-  "Вежливость в чате повышает шанс длинной беседы в 4 раза.",
-  "Незнакомцу легче рассказать то, что давно хранишь в себе.",
-  "Спонтанные разговоры чаще всего оказываются самыми живыми.",
-  "Короткие ответы — не всегда отсутствие интереса.",
-  "Иногда человеку нужен не собеседник, а внимание.",
-  "Чем проще сообщение, тем легче начать разговор.",
-  "Люди недооценивают, насколько важны их слова для других.",
-  "Большинство боится быть скучными — но скучных почти нет.",
-  "Реакция «🙂» иногда значит больше, чем длинный текст.",
-  "Тёплое слово от незнакомца запоминается удивительно долго.",
-  "Часто мы ищем понимания, а не идеального ответа.",
-  "Первые десять секунд беседы сильно влияют на её настроение.",
-  "Люди чаще молчат не от скуки, а от волнения.",
-  "Спокойный диалог снимает стресс лучше музыки.",
-  "Иногда незнакомец умеет поддержать лучше всех.",
-  "Тон сообщения читается даже через экран.",
-  "Большинство людей приятнее, чем мы сначала думаем.",
-  "Когда человек пишет «я тут», он говорит намного больше, чем кажется.",
-  "Быстрые ответы создают ощущение близости.",
-  "Иногда лучшее продолжение — честный вопрос.",
-  "Неловкие паузы — нормальная часть разговора.",
-  "Люди чаще вспоминают эмоции от беседы, чем содержание.",
-  "Искреннее сообщение видно сразу, даже без смайликов.",
-  "Один открытый вопрос может оживить любую переписку.",
-  "Когда собеседник пишет первым, это уменьшает тревогу.",
-  "Анонимность помогает людям быть собой.",
-  "Мы недооцениваем силу простого «как ты?».",
-  "Улыбка чувствуется даже в тексте.",
-  "Поддержка от незнакомца часто воспринимается особенно сильно.",
-  "Большинство людей хотят быть услышанными, а не оценёнными.",
-  "Иногда лучшее, что можно написать — короткое «я понимаю».",
-  "Лёгкий юмор делает разговор комфортнее для обоих.",
-  "Тёплый диалог может изменить настроение на весь день.",
-  "В каждом человеке есть что-то интересное — нужно только спросить.",
-  "Практически каждый хочет общаться, просто не все решаются начать.",
+"В среднем человек открывается незнакомцу в 2 раза быстрее.",
+"Каждый третий начинает разговор с человеком, которого никогда бы не выбрал в реальной жизни.",
+"Самое короткое общение может стать самым запоминающимся.",
+"Большинство людей боятся начинать беседу, но рады, когда это делает другой.",
+"Честность в анонимном чате выше на 70%.",
+"Люди чаще обсуждают мечты с незнакомцами, чем с друзьями.",
+"Улыбка в тексте чувствуется, даже если её не видно.",
+"Самый частый первый вопрос — «Как дела?» — но он почти всегда работает.",
+"Большинство разговоров заканчиваются позже, чем собеседники ожидали.",
+"Некоторые незнакомцы понимают нас лучше знакомых.",
+"Опыт общения растёт быстрее, чем кажется.",
+"Случайный диалог может изменить настроение на весь день.",
+"Большинство людей боятся быть скучными — но ими почти никто не бывает.",
+"Люди читают сообщения внимательнее, чем кажется.",
+"Каждый разговор — это маленькая история.",
+"Мы недооцениваем, насколько можем быть интересными.",
+"Незнакомцы часто честнее друзей.",
+"Иногда одно сообщение может спасти день.",
+"Чаще всего люди приходят «на минуту», но остаются надолго.",
+"Один комплимент способен изменить всю беседу.",
+"Большинство людей ищут не разговор, а понимание.",
+"Тёплая беседа запоминается дольше холодной.",
+"Каждый четвёртый человек в чате — интроверт.",
+"Иногда собеседник ищет не ответ, а сопровождение.",
+"Лучшие разговоры рождаются случайно.",
+"Большинство людей рады, когда их слушают.",
+"Короткий диалог может быть ценнее длинного.",
+"Каждый раз, начиная чат, начинается новая история.",
+"Тишина в диалоге — не конец, а часть ритма.",
+"Искренность ценится выше всего.",
+"Большинство людей скрывают, что им одиноко.",
+"Слова поддержки — самые сильные слова.",
+"Люди забывают текст, но не забывают эмоции.",
+"Открытый вопрос всегда работает лучше закрытого.",
+"Незнакомцы могут сказать то, чего не скажут знакомые.",
+"Самый ценный собеседник — тот, кто слушает.",
+"Мы часто не знаем, насколько важны наши слова.",
+"Лучшие ответы приходят спонтанно.",
+"Многие люди боятся начать, но не боятся продолжать.",
+"Случайность — это не ошибка, а возможность.",
+"Каждый диалог уникален — даже если темы одинаковые.",
+"Люди чаще пишут правду в анонимности.",
+"Один вопрос может раскрыть человека.",
+"Иногда нужно всего одно сообщение, чтобы разговор ожил.",
+"Чем меньше ожиданий — тем лучше диалог.",
+"Многие приходят сюда, чтобы просто не быть одни.",
+"Тёплое слово — это лучший подарок незнакомцу."
 ];
 
-window.onload = () => {
-  const fb = document.getElementById("factBox");
-  const ft = document.getElementById("factText");
-
-  ft.textContent = facts[Math.floor(Math.random()*facts.length)];
-  fb.style.display = "block";
-
-  setTimeout(()=> fb.classList.add("show"), 20);
-
-  document.getElementById("factClose").onclick = () => {
-    fb.classList.remove("show");
-    setTimeout(()=> fb.style.display="none",250);
+/* показать факт дня один раз при загрузке */
+window.addEventListener('load', () => {
+  const box = document.getElementById('factBox');
+  const text = document.getElementById('factText');
+  text.textContent = facts[Math.floor(Math.random() * facts.length)];
+  box.style.display = 'block';
+  setTimeout(()=> box.classList.add('show'), 20);
+  document.getElementById('factClose').onclick = ()=> {
+    box.classList.remove('show');
+    setTimeout(()=> box.style.display='none', 260);
   };
-
-  updateRatingBox();
-};
-
-document.getElementById("themeBtn").onclick = () => {
-  document.body.classList.toggle("light");
-};
-
-/* ОНЛАЙН */
-socket.on("online_count", n => {
-  document.getElementById("online").textContent = n;
-});
-
-/* ПОИСК */
-document.getElementById("findBtn").onclick = () => {
-  hideRatingBox();
-
-  document.getElementById("spinner").style.display="block";
-  document.getElementById("stopSearch").style.display="block";
-  document.getElementById("findBtn").style.display="none";
-
-  const chatCount = +localStorage.getItem("chatCount") || 0;
-
-  socket.emit("find", {
-    gender: gender.value,
-    searchfor: searchfor.value,
-    chatCount
-  });
-};
-
-/* ОТМЕНА ПОИСКА */
-document.getElementById("stopSearch").onclick = () => {
-  const inChat = document.getElementById("chat").style.display === "block";
-
-  if(inChat){
-    socket.emit("end");
-  } else {
-    socket.emit("cancel_search");
-    showRatingBox();
-  }
-
-  document.getElementById("spinner").style.display="none";
-  document.getElementById("stopSearch").style.display="none";
-  document.getElementById("findBtn").style.display="block";
-};
-
-/* СТАРТ ЧАТА */
-socket.on("chat_start", data => {
-  hideRatingBox();
-
-  document.getElementById("panel").style.display="none";
-  document.getElementById("chat").style.display="block";
-
-  messages.innerHTML="";
-  typing.innerHTML="";
-
-  const status = data?.partnerChatCount || 0;
-  partnerStatus.textContent = "Собеседник: " + getStatus(status);
-
-  spinner.style.display="none";
-  stopSearch.style.display="none";
-  findBtn.style.display="none";
-  endBtn.style.display="block";
-});
-
-/* ==========================================
-      ОТПРАВКА ТЕКСТА
-========================================== */
-
-sendBtn.onclick = sendMsg;
-msgInput.addEventListener("keydown", e=>{
-  if(e.key === "Enter") sendMsg();
-  socket.emit("typing");
-});
-
-function sendMsg(){
-  const t = msgInput.value.trim();
-  if(!t) return;
-
-  appendMsg("Вы: " + t, "self");
-  socket.emit("msg", t);
-  msgInput.value="";
-}
-
-socket.on("msg", txt=>{
-  appendMsg("Собеседник: " + txt, "other");
-});
-
-/* Добавление сообщений */
-function escapeHtml(s){
-  return s.replace(/[&<>]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
-}
-
-function appendMsg(text, from="self"){
-  const d = document.createElement("div");
-  d.className="msg";
-  d.dataset.from = from;
-  d.innerHTML = escapeHtml(text) + '<span class="msg-react"></span>';
-
-  if(from === "other")
-    d.addEventListener("click", e=> openReactionMenu(e, d));
-
-  messages.appendChild(d);
-  messages.scrollTop = messages.scrollHeight;
-}
-
-/* ==========================================
-      ТYPING
-========================================== */
-socket.on("typing", ()=>{
-  typing.innerHTML = 'Печатает <span class="typing-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>';
-  clearTimeout(window._tt);
-  window._tt = setTimeout(()=> typing.innerHTML="",1300);
-});
-
-/* ==========================================
-      ГОЛОСОВЫЕ СООБЩЕНИЯ
-========================================== */
-
-let mediaRecorder = null;
-let audioChunks = [];
-const voiceBtn = document.getElementById("voiceBtn");
-
-voiceBtn.onmousedown = startRecord;
-voiceBtn.onmouseup   = stopRecord;
-voiceBtn.onmouseleave = stopRecord;
-
-async function startRecord(){
-  voiceBtn.classList.add("recording");
-
-  const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-  mediaRecorder = new MediaRecorder(stream);
-
-  audioChunks = [];
-
-  mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-
-  mediaRecorder.onstop = () => {
-    const blob = new Blob(audioChunks, {type:"audio/webm"});
-    socket.emit("voice", blob);
-
-    appendVoice(blob, "self");
-  };
-
-  mediaRecorder.start();
-}
-
-function stopRecord(){
-  if(mediaRecorder && mediaRecorder.state !== "inactive"){
-    voiceBtn.classList.remove("recording");
-    mediaRecorder.stop();
-  }
-}
-
-socket.on("voice", blob=>{
-  appendVoice(blob, "other");
-});
-
-function appendVoice(blob, from="self"){
-  const url = URL.createObjectURL(blob);
-
-  const d = document.createElement("div");
-  d.className = "msg";
-  d.dataset.from = from;
-
-  d.innerHTML = (from==="self"?"Вы:":"Собеседник:") +
-    "<br><audio controls src='"+url+"'></audio>" +
-    '<span class="msg-react"></span>';
-
-  if(from==="other")
-      d.addEventListener("click", e=> openReactionMenu(e, d));
-
-  messages.appendChild(d);
-  messages.scrollTop = messages.scrollHeight;
-}
-
-/* ==========================================
-      РЕАКЦИИ
-========================================== */
-
-const reactionMenu = document.getElementById("reactionMenu");
-let lastMsg = null;
-
-function openReactionMenu(e, msg){
-  lastMsg = msg;
-  reactionMenu.style.display="flex";
-  e.stopPropagation();
-}
-
-document.addEventListener("click", e=>{
-  if(!reactionMenu.contains(e.target)){
-    reactionMenu.style.display="none";
-  }
-});
-
-document.querySelectorAll(".reaction").forEach(r=>{
-  r.onclick = ()=>{
-    const emoji = r.textContent;
-    lastMsg.querySelector(".msg-react").textContent = emoji;
-
-    const index = [...messages.children].indexOf(lastMsg);
-
-    socket.emit("reaction", {emoji, index});
-
-    reactionMenu.style.display="none";
-  };
-});
-
-socket.on("reaction", data=>{
-  const msg = messages.children[data.index];
-  if(msg) msg.querySelector(".msg-react").textContent = data.emoji;
-});
-
-/* ==========================================
-      ЗАВЕРШЕНИЕ ЧАТА
-========================================== */
-
-endBtn.onclick = ()=> socket.emit("end");
-
-socket.on("chat_end", ()=>{
-  chat.style.display="none";
-  panel.style.display="block";
-
-  messages.innerHTML="";
-  partnerStatus.textContent="";
-  reactionMenu.style.display="none";
-
-  spinner.style.display="none";
-  stopSearch.style.display="none";
-  findBtn.style.display="block";
-  endBtn.style.display="none";
-
-  let c = +localStorage.getItem("chatCount") || 0;
-  c++;
-  localStorage.setItem("chatCount", c);
 
   updateRatingBox();
   showRatingBox();
 });
 
-/* ==========================================
-      РЕЙТИНГ
-========================================== */
+/* тема */
+document.getElementById('themeBtn').onclick = ()=>{
+  document.body.classList.toggle('light');
+  document.getElementById('themeBtn').textContent = document.body.classList.contains('light') ? 'Светлая тема' : 'Тёмная тема';
+};
 
+/* шаринг */
+document.getElementById('shareBtn')?.addEventListener('click', ()=> {
+  const url = location.href;
+  if(navigator.share) navigator.share({ title: 'Ruslan Chat', url });
+  else { navigator.clipboard.writeText(url); alert('Ссылка скопирована!'); }
+});
+
+/* онлайн */
+socket.on('online_count', n => document.getElementById('online').textContent = n);
+
+/* найти */
+document.getElementById('findBtn').onclick = ()=>{
+  hideRatingBox();
+  document.getElementById('spinner').style.display='block';
+  document.getElementById('stopSearch').style.display='block';
+  document.getElementById('findBtn').style.display='none';
+
+  const chatCount = +localStorage.getItem('chatCount') || 0;
+  socket.emit('find', { gender: document.getElementById('gender').value, searchfor: document.getElementById('searchfor').value, chatCount });
+};
+
+/* прекратить поиск — если в чате: end, иначе cancel_search + вернуть рейтинг */
+document.getElementById('stopSearch').onclick = ()=>{
+  document.getElementById('spinner').style.display='none';
+  document.getElementById('stopSearch').style.display='none';
+  document.getElementById('findBtn').style.display='block';
+
+  const inChat = document.getElementById('chat').style.display === 'block';
+  if(inChat) {
+    socket.emit('end');
+  } else {
+    socket.emit('cancel_search');
+    showRatingBox();
+  }
+};
+
+/* старт чата */
+socket.on('chat_start', data => {
+  hideRatingBox();
+  document.getElementById('panel').style.display='none';
+  document.getElementById('chat').style.display='block';
+  document.getElementById('messages').innerHTML='';
+  document.getElementById('typing').innerHTML='';
+
+  const partnerCount = data?.partnerChatCount || 0;
+  document.getElementById('partnerStatus').textContent = 'Собеседник: ' + (getStatus(partnerCount) || 'Новый собеседник');
+
+  document.getElementById('spinner').style.display='none';
+  document.getElementById('stopSearch').style.display='none';
+  document.getElementById('findBtn').style.display='none';
+  document.getElementById('endBtn').style.display='block';
+});
+
+/* отправка сообщений */
+document.getElementById('sendBtn').onclick = sendMsg;
+document.getElementById('msgInput').addEventListener('keydown', e=>{
+  if(e.key === 'Enter') sendMsg();
+  socket.emit('typing');
+});
+function sendMsg(){
+  const input = document.getElementById('msgInput');
+  const t = input.value.trim();
+  if(!t) return;
+  appendMsg('Вы: ' + t, 'self');
+  socket.emit('msg', t);
+  input.value = '';
+}
+socket.on('msg', t => appendMsg('Собеседник: ' + t, 'other'));
+
+/* экранировать текст и добавить сообщение */
+function escapeHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function appendMsg(text, from='self'){
+  const wrap = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'msg';
+  d.dataset.from = from;
+  d.innerHTML = escapeHtml(text) + ' <span class="msg-react"></span>';
+  if(from === 'other') d.addEventListener('click', e=> openReactionMenu(e, d));
+  wrap.appendChild(d);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+/* typing — визуальные точки */
+socket.on('typing', () => {
+  const typing = document.getElementById('typing');
+  typing.innerHTML = 'Печатает <span class="typing-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>';
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(()=> { typing.innerHTML = ''; }, 1400);
+});
+
+/* реакции: фиксированное меню (центр) */
+const reactionMenu = document.getElementById('reactionMenu');
+let lastClickedMsg = null;
+function openReactionMenu(e, msg){
+  if(!msg || msg.dataset.from === 'self') return;
+  lastClickedMsg = msg;
+  reactionMenu.style.display = 'flex';
+  reactionMenu.setAttribute('aria-hidden','false');
+  e.stopPropagation();
+}
+/* выбрать реакцию */
+document.querySelectorAll('.reaction').forEach(node=>{
+  node.addEventListener('click', ev=>{
+    ev.stopPropagation();
+    if(!lastClickedMsg) return;
+    const emoji = node.textContent;
+    lastClickedMsg.querySelector('.msg-react').textContent = emoji;
+    // отправить индекс сообщения партнёру
+    const list = Array.from(document.getElementById('messages').children);
+    const index = list.indexOf(lastClickedMsg);
+    socket.emit('reaction', { emoji, index });
+    reactionMenu.style.display = 'none';
+    reactionMenu.setAttribute('aria-hidden','true');
+    lastClickedMsg = null;
+  });
+});
+
+/* получить реакцию */
+socket.on('reaction', data=>{
+  if(!data) return;
+  const list = document.getElementById('messages').children;
+  const msg = list[data.index];
+  if(msg) msg.querySelector('.msg-react').textContent = data.emoji;
+});
+/* скрыть меню при клике вне */
+document.addEventListener('click', e=>{
+  if(!reactionMenu.contains(e.target)) {
+    reactionMenu.style.display = 'none';
+    reactionMenu.setAttribute('aria-hidden','true');
+    lastClickedMsg = null;
+  }
+});
+
+/* завершение чата */
+document.getElementById('endBtn').onclick = ()=> socket.emit('end');
+socket.on('chat_end', ()=> {
+  document.getElementById('chat').style.display='none';
+  document.getElementById('panel').style.display='block';
+  document.getElementById('messages').innerHTML='';
+  document.getElementById('partnerStatus').textContent='';
+  reactionMenu.style.display = 'none';
+  document.getElementById('spinner').style.display='none';
+  document.getElementById('stopSearch').style.display='none';
+  document.getElementById('findBtn').style.display='block';
+  document.getElementById('endBtn').style.display='none';
+  showRatingBox();
+  let c = +localStorage.getItem('chatCount') || 0;
+  c++;
+  localStorage.setItem('chatCount', c);
+  updateRatingBox();
+});
+
+/* рейтинг */
 function getStatus(n){
-  if(n>=1200) return "КОРОЛЬ";
-  if(n>=700) return "Популярный собеседник";
-  if(n>=300) return "Опытный собеседник";
-  if(n>=50) return "Хороший собеседник";
-  return "Новичок";
+  if(n>=1200) return 'КОРОЛЬ';
+  if(n>=700) return 'Популярный собеседник';
+  if(n>=300) return 'Опытный собеседник';
+  if(n>=50) return 'Хороший собеседник';
+  return 'Новичок';
 }
-
 function updateRatingBox(){
-  const n = +localStorage.getItem("chatCount") || 0;
-  ratingYou.textContent = `Ваш уровень: ${getStatus(n)} — (${n} чатов)`;
+  const n = +localStorage.getItem('chatCount') || 0;
+  document.getElementById('ratingYou').textContent = `Ваш уровень: ${getStatus(n)} — (${n} чатов)`;
+}
+function hideRatingBox(){ document.getElementById('ratingBox').style.display='none'; }
+function showRatingBox(){ document.getElementById('ratingBox').style.display='block'; }
+document.getElementById('findBtn').addEventListener('click', hideRatingBox);
+
+/* стартовые действия */
+updateRatingBox();
+showRatingBox();
+
+/* сброс lastClicked при уходе */
+window.addEventListener('beforeunload', ()=> lastClickedMsg = null);
+
+/* ================= Voice messages ================= */
+const voiceBtn = document.getElementById('voiceBtn');
+const MAX_SECONDS = 60;
+let mediaRecorder = null;
+let audioChunks = [];
+let recordStartTime = 0;
+let recordInterval = null;
+const recordTimerEl = document.createElement('span');
+recordTimerEl.className = 'record-timer';
+
+function appendVoice(blob, from='self'){
+  const wrap = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'msg';
+  d.dataset.from = from;
+  // audio element
+  const url = URL.createObjectURL(blob);
+  const who = (from === 'self') ? 'Вы: ' : 'Собеседник: ';
+  d.innerHTML = escapeHtml(who) + '<br><audio controls src="' + url + '"></audio> <span class="msg-react"></span>';
+  if(from === 'other') d.addEventListener('click', e=> openReactionMenu(e, d));
+  wrap.appendChild(d);
+  wrap.scrollTop = wrap.scrollHeight;
 }
 
-function hideRatingBox(){ ratingBox.style.display="none"; }
-function showRatingBox(){ ratingBox.style.display="block"; }
-</script>
+// start recording
+async function startRecording(){
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    mediaRecorder.ondataavailable = e => { if(e.data && e.data.size) audioChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      // stop tracks
+      stream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      // if small, ignore
+      if (blob.size > 200) {
+        socket.emit('voice', blob);
+        appendVoice(blob, 'self');
+      }
+      audioChunks = [];
+      mediaRecorder = null;
+    };
+    mediaRecorder.start();
+    recordStartTime = Date.now();
+    voiceBtn.classList.add('recording');
+    voiceBtn.appendChild(recordTimerEl);
+    updateRecordTimer();
+    recordInterval = setInterval(updateRecordTimer, 300);
+  } catch (err) {
+    console.warn('microphone error', err);
+    alert('Не получилось получить доступ к микрофону — разрешите доступ и попробуйте снова.');
+  }
+}
 
+function updateRecordTimer(){
+  const elapsed = Math.floor((Date.now() - recordStartTime) / 1000);
+  recordTimerEl.textContent = (elapsed > MAX_SECONDS ? 'MAX' : elapsed + 's');
+  if (elapsed >= MAX_SECONDS) stopRecording(false);
+}
+
+// stop recording; if cancelled==true — do not send
+function stopRecording(cancelled = false){
+  if(recordInterval){ clearInterval(recordInterval); recordInterval = null; }
+  voiceBtn.classList.remove('recording');
+  if(recordTimerEl.parentNode === voiceBtn) voiceBtn.removeChild(recordTimerEl);
+  if(!mediaRecorder) return;
+  if (cancelled) {
+    // stop without triggering onstop handler send
+    mediaRecorder.onstop = () => {};
+    try { mediaRecorder.stop(); } catch(e){}
+    mediaRecorder = null;
+    audioChunks = [];
+    return;
+  }
+  try { mediaRecorder.stop(); } catch(e){}
+}
+
+/* pointer events: good for desktop + mobile */
+voiceBtn.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  startRecording();
+});
+voiceBtn.addEventListener('pointerup', (e) => {
+  e.preventDefault();
+  stopRecording(false);
+});
+voiceBtn.addEventListener('pointercancel', (e) => {
+  stopRecording(true);
+});
+voiceBtn.addEventListener('pointerleave', (e) => {
+  // if pointer leaves while pressed -> cancel
+  if(mediaRecorder && mediaRecorder.state !== 'inactive') stopRecording(true);
+});
+
+/* receive voice from partner */
+socket.on('voice', (data) => {
+  // data can be Blob or ArrayBuffer depending on transport; normalize
+  if (!data) return;
+  if (data instanceof ArrayBuffer) data = new Blob([data], { type: 'audio/webm' });
+  // if it's an object with .data (some adapters) try to handle
+  appendVoice(data, 'other');
+});
+/* ================================================== */
+
+</script>
 </body>
 </html>
