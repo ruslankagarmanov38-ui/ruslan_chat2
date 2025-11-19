@@ -533,6 +533,7 @@ socket.on('chat_end', ()=> {
   document.getElementById('panel').style.display='block';
   document.getElementById('messages').innerHTML='';
   document.getElementById('partnerStatus').textContent='';
+  reactionMenu.style.display = 'none';
 
   document.getElementById('spinner').style.display='none';
   document.getElementById('stopSearch').style.display='none';
