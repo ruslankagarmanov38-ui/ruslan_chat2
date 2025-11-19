@@ -1,156 +1,138 @@
-// server.js
 const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
 const io = require("socket.io")(http, {
-  cors: { origin: "*" },
-  maxHttpBufferSize: 20 * 1024 * 1024 // 20MB — достаточно для голосовых
+    cors: { origin: "*" }
 });
 
-app.use(express.static("public")); // положи index.html + assets в папку public
+app.use(express.static("public")); // index.html в папке public
 
-// ===== данные на сервере =====
-let waiting = [];         // очередь socket.id
-let partners = {};        // partners[socketId] = partnerSocketId
-let chatMeta = {};        // chatMeta[socketId] = { chatCount: number } (опционально)
+// ===============================
+// ПАМЯТЬ
+// ===============================
+let waiting = [];        // очередь
+let partners = {};       // socketId → partnerId
+let chatData = {};       // socketId → { partner, chatCount }
 
-// ===== помощники =====
+// ===============================
+// Получить партнера
+// ===============================
 function getPartner(id) {
-  return partners[id] || null;
+    return partners[id] || null;
 }
 
-function unlinkPair(id) {
-  const p = partners[id];
-  if (p) delete partners[p];
-  delete partners[id];
-  if (p && partners[p]) { delete partners[p]; }
+// ===============================
+// Разъединить пару
+// ===============================
+function disconnectPair(id) {
+    const p = partners[id];
+    if (p) delete partners[p];
+    delete partners[id];
 }
 
-// ===== socket.io =====
+// ===============================
+// MAIN SOCKET LOGIC
+// ===============================
 io.on("connection", socket => {
-  // отправляем текущее кол-во онлайн клиентам
-  io.emit("online_count", io.engine.clientsCount);
-  console.log("→ connected:", socket.id);
 
-  // ===== find — пользователь ищет собеседника =====
-  socket.on("find", (data = {}) => {
-    const chatCount = data.chatCount || 0;
-    chatMeta[socket.id] = { chatCount };
-
-    // если кто-то уже в очереди — соединяем
-    if (waiting.length > 0) {
-      // найдём партнёра, исключая самого себя, на всякий случай
-      let partner = null;
-      while (waiting.length > 0) {
-        const cand = waiting.shift();
-        if (cand === socket.id) continue;
-        partner = cand;
-        break;
-      }
-
-      if (!partner) {
-        // если подходящего нет — ставим в очередь
-        waiting.push(socket.id);
-        return;
-      }
-
-      partners[socket.id] = partner;
-      partners[partner] = socket.id;
-
-      // отправляем обоим событие chat_start и данные о рейтинге партнёра (если есть)
-      const partnerChatCount = (chatMeta[partner] && chatMeta[partner].chatCount) || 0;
-      const myChatCount = chatCount;
-
-      socket.emit("chat_start", { partnerChatCount });
-      io.to(partner).emit("chat_start", { partnerChatCount: myChatCount });
-
-      console.log(`↔ paired: ${socket.id} <-> ${partner}`);
-    } else {
-      // ставим в очередь
-      waiting.push(socket.id);
-      console.log("⏳ queued:", socket.id);
-    }
-  });
-
-  // ===== cancel_search — пользователь отменил поиск =====
-  socket.on("cancel_search", () => {
-    waiting = waiting.filter(id => id !== socket.id);
-    // обновим онлайн — не обязательно, но пусть будет
     io.emit("online_count", io.engine.clientsCount);
-    console.log("✖ cancel_search:", socket.id);
-  });
+    console.log("User connected:", socket.id);
 
-  // ===== msg — текстовое сообщение =====
-  socket.on("msg", txt => {
-    const p = getPartner(socket.id);
-    if (p) {
-      io.to(p).emit("msg", txt);
-    }
-  });
+    // ========== ПОИСК ==========
+    socket.on("find", data => {
+        const userCount = data.chatCount || 0;
 
-  // ===== typing =====
-  socket.on("typing", () => {
-    const p = getPartner(socket.id);
-    if (p) io.to(p).emit("typing");
-  });
+        if (waiting.length > 0) {
+            const partner = waiting.shift();
 
-  // ===== reaction =====
-  socket.on("reaction", data => {
-    const p = getPartner(socket.id);
-    if (p) io.to(p).emit("reaction", data);
-  });
+            partners[socket.id] = partner;
+            partners[partner] = socket.id;
 
-  // ===== voice — бинарный аудио blob (MediaRecorder blob) =====
-  // Клиент должен отправлять как Blob/ArrayBuffer — socket.io поддерживает бинарно
-  socket.on("voice", (blob) => {
-    const p = getPartner(socket.id);
-    if (!p) return;
-    // просто ретранслируем данные партнёру
-    io.to(p).emit("voice", blob);
-  });
+            chatData[socket.id] = { partner, chatCount: userCount };
+            chatData[partner] = { partner: socket.id, chatCount: chatData[partner].chatCount || 0 };
 
-  // ===== end — пользователь завершил чат (выключаем у обоих) =====
-  socket.on("end", () => {
-    const p = getPartner(socket.id);
-    if (p) {
-      io.to(p).emit("chat_end");
-      io.to(socket.id).emit("chat_end");
-      // разрываем связь у обоих
-      unlinkPair(socket.id);
-      console.log("🔚 chat ended (both):", socket.id, p);
-    } else {
-      // если партнёра нет — всё равно уведомим себя
-      io.to(socket.id).emit("chat_end");
-      unlinkPair(socket.id);
-      console.log("🔚 chat ended (self only):", socket.id);
-    }
-  });
+            socket.emit("chat_start", {
+                partnerChatCount: chatData[partner].chatCount
+            });
 
-  // ===== disconnect =====
-  socket.on("disconnect", () => {
-    console.log("← disconnected:", socket.id);
+            io.to(partner).emit("chat_start", {
+                partnerChatCount: userCount
+            });
 
-    // убрать из очереди (если был)
-    waiting = waiting.filter(id => id !== socket.id);
+        } else {
+            waiting.push(socket.id);
+            chatData[socket.id] = { partner: null, chatCount: userCount };
+        }
+    });
 
-    // уведомить партнёра, если есть
-    const p = getPartner(socket.id);
-    if (p) {
-      io.to(p).emit("chat_end");
-      unlinkPair(socket.id);
-      console.log("🔔 partner notified:", p);
-    }
+    // ========== ОТМЕНА ПОИСКА ==========
+    socket.on("cancel_search", () => {
+        waiting = waiting.filter(id => id !== socket.id);
+    });
 
-    // обновляем счётчик онлайн
-    io.emit("online_count", io.engine.clientsCount);
-  });
+    // ========== ТЕКСТОВЫЕ СООБЩЕНИЯ ==========
+    socket.on("msg", txt => {
+        const partner = getPartner(socket.id);
+        if (partner) io.to(partner).emit("msg", txt);
+    });
+
+    // ========== ПЕЧАТАЕТ ==========
+    socket.on("typing", () => {
+        const partner = getPartner(socket.id);
+        if (partner) io.to(partner).emit("typing");
+    });
+
+    // ========== РЕАКЦИИ ==========
+    socket.on("reaction", data => {
+        const partner = getPartner(socket.id);
+        if (partner) io.to(partner).emit("reaction", data);
+    });
+
+    // ======================================
+    // 🔊 ГОЛОСОВЫЕ СООБЩЕНИЯ
+    // ======================================
+    socket.on("voice", blob => {
+        const partner = getPartner(socket.id);
+        if (partner) {
+            io.to(partner).emit("voice", blob);
+        }
+    });
+
+    // ========== ЗАВЕРШЕНИЕ ЧАТА ==========
+    socket.on("end", () => {
+        const partner = getPartner(socket.id);
+
+        if (partner) {
+            io.to(partner).emit("chat_end");
+            disconnectPair(socket.id);
+        }
+
+        socket.emit("chat_end");
+    });
+
+    // ========== ОТКЛЮЧЕНИЕ ==========
+    socket.on("disconnect", () => {
+        console.log("User disconnected:", socket.id);
+
+        waiting = waiting.filter(id => id !== socket.id);
+
+        const partner = getPartner(socket.id);
+        if (partner) {
+            io.to(partner).emit("chat_end");
+            disconnectPair(socket.id);
+        }
+
+        io.emit("online_count", io.engine.clientsCount);
+    });
 });
 
-// ===== запуск сервера =====
+// ===============================
+// START SERVER
+// ===============================
 const PORT = process.env.PORT || 8080;
 http.listen(PORT, () => {
-  console.log("================================");
-  console.log("🚀 Server listening on port:", PORT);
-  console.log("🌍 http://localhost:" + PORT);
-  console.log("================================");
+    console.log("================================");
+    console.log("🚀 Сервер запущен на порту:", PORT);
+    console.log("🌍 Локальный адрес: http://localhost:" + PORT);
+    console.log("================================");
 });
