@@ -217,12 +217,57 @@ select {
     border-radius: 10px;
     display: none;
 }
+
+/* --------------------------
+   ФАКТ ДНЯ — ОКНО
+---------------------------*/
+
+#factBox {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(.8);
+    width: 300px;
+    padding: 18px;
+    background: rgba(0,0,0,0.92);
+    border-radius: 14px;
+    border: 2px solid #00ff91;
+    box-shadow: 0 0 20px #00ff91;
+    opacity: 0;
+    transition: .25s ease;
+    z-index: 9999;
+    color: #fff;
+    display: none;
+}
+
+#factBox.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+#factClose {
+    position: absolute;
+    right: 12px;
+    top: 6px;
+    cursor: pointer;
+    font-size: 18px;
+    color: #00ff91;
+}
+
 </style>
 
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 </head>
 
 <body>
+
+<!-- Факт дня -->
+<div id="factBox">
+    <div id="factClose">✖</div>
+    <h3 style="text-align:center;margin-top:5px;color:#00ff91;" class="glow">Факт дня</h3>
+    <p id="factText" style="text-align:center;font-size:15px;"></p>
+</div>
+
 
 <div id="header">
     <div style="display:flex;align-items:center;gap:12px;">
@@ -233,12 +278,10 @@ select {
     <button id="themeBtn">Тёмная тема</button>
 </div>
 
-<!-- Фраза 6 ("9 из 10") -->
 <div style="text-align:center; margin-top:5px; font-size:18px; color:var(--text);" class="glow">
     9 из 10 находят интересного собеседника за 5 секунд
 </div>
 
-<!-- ГЛАВНАЯ ПАНЕЛЬ -->
 <div id="panel">
 
     <div style="font-size:18px;">Онлайн: <span id="online">0</span></div><br>
@@ -260,11 +303,10 @@ select {
     <div id="spinner"></div>
     <button id="stopSearch">ПРЕКРАТИТЬ ПОИСК</button>
 
-    <!-- Кнопка (7) Поделиться -->
     <button id="shareBtn">Поделиться сайтом</button>
 </div>
 
-<!-- ЧАТ -->
+
 <div id="chat">
     <div id="messages"></div>
     <div id="typing"></div>
@@ -278,24 +320,64 @@ select {
 </div>
 
 
+
 <script>
+
 let socket = io();
 let typingTimer;
 
-/* ТЕМА */
-let dark = true;
-themeBtn.onclick = () => {
-    dark = !dark;
-    document.body.classList.toggle("light");
-    themeBtn.textContent = dark ? "Тёмная тема" : "Светлая тема";
+/* -------- ФАКТ ДНЯ ---------- */
+
+const facts = [
+"В среднем человек открывается незнакомцу в 2 раза быстрее.",
+"Первые 10 секунд решают, продолжится ли разговор.",
+"Каждый пятый находит нового друга в анонимном чате.",
+"66% людей честнее с незнакомцами.",
+"Разговор улучшает настроение в 78% случаев.",
+"Молчание — тоже часть общения.",
+"Лучшие диалоги начинаются случайно.",
+"Самые искренние ответы — первые.",
+"Люди читают сообщения дольше, чем ты думаешь.",
+"Хороший собеседник — редкость.",
+"Каждый день в чатах рождаются тысячи мини-историй.",
+"Анонимность делает людей честнее.",
+"Некоторые диалоги забываются, некоторые — нет.",
+"Твой собеседник сейчас тоже чего-то ждёт.",
+"90% недооценивают, насколько они интересны.",
+"Каждый второй остаётся дольше, чем планировал.",
+"Один диалог может изменить настроение на весь день.",
+"Многие приходят «на минуту», а остаются на час.",
+"Самые тёплые разговоры — с теми, кого не знаешь.",
+"Люди чаще делятся мечтами с незнакомцами."
+];
+
+window.onload = () => {
+    let box = document.getElementById("factBox");
+    let text = document.getElementById("factText");
+    text.textContent = facts[Math.floor(Math.random() * facts.length)];
+
+    box.style.display = "block";
+    setTimeout(() => box.classList.add("show"), 20);
+
+    document.getElementById("factClose").onclick = () => {
+        box.classList.remove("show");
+        setTimeout(() => box.style.display = "none", 250);
+    };
 };
 
-/* Поделиться сайтом */
+/* -------------------------------------------------- */
+
+themeBtn.onclick = () => {
+    document.body.classList.toggle("light");
+    themeBtn.textContent =
+        document.body.classList.contains("light") ?
+        "Светлая тема" : "Тёмная тема";
+};
+
 shareBtn.onclick = () => {
     const url = "https://ruslan-chat2.onrender.com/";
-    if (navigator.share) {
-        navigator.share({ title: "Ruslan Chat", url });
-    } else {
+    if (navigator.share) navigator.share({ title: "Ruslan Chat", url });
+    else {
         navigator.clipboard.writeText(url);
         alert("Ссылка скопирована!");
     }
@@ -303,7 +385,6 @@ shareBtn.onclick = () => {
 
 socket.on("online_count", n => online.textContent = n);
 
-/* Поиск собеседника */
 findBtn.onclick = () => {
     spinner.style.display = "block";
     stopSearch.style.display = "block";
@@ -315,7 +396,6 @@ findBtn.onclick = () => {
     });
 };
 
-/* Прекратить поиск */
 stopSearch.onclick = () => {
     spinner.style.display = "none";
     stopSearch.style.display = "none";
@@ -324,18 +404,14 @@ stopSearch.onclick = () => {
     socket.emit("cancel_search");
 };
 
-/* Начало чата */
 socket.on("chat_start", () => {
     panel.style.display = "none";
     chat.style.display = "block";
-
     messages.innerHTML = "";
     typing.innerHTML = "";
-
     endBtn.style.display = "block";
 });
 
-/* Отправка сообщений */
 sendBtn.onclick = sendMsg;
 msgInput.onkeydown = e => {
     if (e.key === "Enter") sendMsg();
@@ -345,7 +421,6 @@ msgInput.onkeydown = e => {
 function sendMsg() {
     let text = msgInput.value.trim();
     if (!text) return;
-
     append("Вы: " + text);
     socket.emit("msg", text);
     msgInput.value = "";
@@ -361,27 +436,23 @@ function append(t) {
     messages.scrollTop = messages.scrollHeight;
 }
 
-/* Печатает */
 socket.on("typing", () => {
     typing.textContent = "Собеседник печатает...";
     clearTimeout(typingTimer);
     typingTimer = setTimeout(() => typing.textContent = "", 1500);
 });
 
-/* Завершить чат */
 endBtn.onclick = () => socket.emit("end");
 
-/* Чат завершён */
 socket.on("chat_end", () => {
     chat.style.display = "none";
     panel.style.display = "block";
-
     spinner.style.display = "none";
     stopSearch.style.display = "none";
     findBtn.style.display = "block";
-
     messages.innerHTML = "";
 });
+
 </script>
 
 </body>
